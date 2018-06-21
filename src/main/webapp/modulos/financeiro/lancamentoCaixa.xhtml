@@ -1,0 +1,167 @@
+<ui:composition template="/WEB-INF/template.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <ui:define name="gridDados">
+        <p:panel style="border: none" header="Lancamento manual"
+                 rendered="#{!lancamentoCaixaController.podeConsultar()}">
+            <p:outputLabel value="Você não possui acesso a esta função" />
+        </p:panel>
+
+        <p:outputPanel id="outputPanelGrid">
+
+            <p:outputPanel rendered="#{lancamentoCaixaController.telaGrid}">
+                <p:panel id="panelCentroGrid" style="border: none" header="Lancamento manual"
+                         rendered="#{lancamentoCaixaController.podeConsultar()}">
+
+                    <p:dataTable id="dataTableLancamentoCaixa" var="obj"
+                                 value="#{lancamentoCaixaController.dataModel}" paginator="true" rows="10"
+                                 rowsPerPageTemplate="5,10,15,20"
+                                 selection="#{lancamentoCaixaController.objetoSelecionado}"
+                                 selectionMode="single" resizableColumns="true" lazy="true">
+
+                        <f:facet name="header">
+                            <p:commandButton title="Novo" icon="ui-icon-plus"
+                                             actionListener="#{lancamentoCaixaController.incluir()}"
+                                             update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                             disabled="#{!lancamentoCaixaController.podeInserir()}" />
+                            <p:commandButton process="dataTableLancamentoCaixa" title="Detalhes"
+                                             icon="ui-icon-zoom-in"
+                                             actionListener="#{lancamentoCaixaController.alterar()}"
+                                             update=":form1:outputPanelGrid,:form1:outputPanelDetalhe" />
+                            <p:commandButton process="dataTableLancamentoCaixa" title="Excluir"
+                                             icon="ui-icon-trash" actionListener="#{lancamentoCaixaController.excluir()}"
+                                             update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                             disabled="#{!lancamentoCaixaController.podeExcluir()}">
+                                <p:confirm header="Confirmação" message="Confirma Exclusão?"
+                                           icon="ui-icon-alert" />
+                            </p:commandButton>
+                        </f:facet>
+                        
+                        <p:column headerText="Descrição">
+			                <h:outputLabel value="#{obj.descricao}" />
+			            </p:column>
+			            
+			            <p:column headerText="Data">
+			                 <h:outputLabel value="#{obj.data}" >
+			                    <f:convertDateTime pattern="dd/MM/yyyy" />
+			                 </h:outputLabel>
+			            </p:column>
+			            <p:column headerText="Terceiro">
+			                 <h:outputLabel value="#{obj.clienteFornecedor}" />
+			            </p:column>
+			                        
+			            <p:column headerText="Tipo">
+			                 <h:outputLabel value="#{obj.tipo}" />
+			            </p:column>
+			            
+			            <p:column headerText="Valor">
+			                <h:outputLabel value="#{obj.valor}" >
+			                    <f:convertNumber pattern="#,###,##0.00" />
+			                </h:outputLabel>
+			            </p:column>
+                       
+                    </p:dataTable>
+                </p:panel>
+            </p:outputPanel>
+
+        </p:outputPanel>
+
+    </ui:define>
+
+    <ui:define name="telaInclusaoAlteracao">
+
+        <p:outputPanel id="outputPanelDetalhe">
+
+            <p:outputPanel rendered="#{!lancamentoCaixaController.telaGrid}">
+                <p:panel id="panelCentroDetalhe" style="border: none" header="Lancamento manual">
+
+                    <p:outputLabel value="Nenhum registro selecionado."
+                                   rendered="#{empty lancamentoCaixaController.objeto}" />
+                    <p:commandButton value="Voltar"
+                                     actionListener="#{lancamentoCaixaController.voltar()}"
+                                     update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                     rendered="#{empty lancamentoCaixaController.objeto}" />
+
+                    <p:outputPanel rendered="#{not empty lancamentoCaixaController.objeto}">
+                        <h:panelGrid columns="1" cellpadding="5">
+                        
+                            <p:outputLabel value="Tipo" />
+                            <p:selectOneMenu id="tipoLancamento" style="width: 70%;"
+                             value="#{lancamentoCaixaController.objeto.tipo}" 
+                             var="objeto">
+                               <f:selectItem itemValue="" itemLabel="Selecione"/>
+				               <f:selectItems value="#{lancamentoCaixaController.debitoCredito}" itemValue="#{objeto}"/>
+				            </p:selectOneMenu>
+                            
+                            <p:outputLabel value="Data" />
+                            <p:calendar 
+                             value="#{lancamentoCaixaController.objeto.data}"
+                             pattern="dd/MM/yyyy" />
+                             
+                            <p:outputLabel value="Cliente / Fornecedor" />
+                            <p:inputText value="#{lancamentoCaixaController.objeto.clienteFornecedor}" />
+                             
+                            <p:outputLabel value="Plano de contas" />                           			            
+				            <p:autoComplete id="planoContas"        					
+				                value="#{lancamentoCaixaController.objeto.finPlanoContas}"
+				                completeMethod="#{lancamentoCaixaController.getListaPlanoContas}" var="objeto"
+				                itemLabel="#{objeto.descricao}" itemValue="#{objeto}"
+				                converter="planoContasConverter" forceSelection="true"
+				                minQueryLength="3" maxResults="10" size="70"
+				                emptyMessage="Nenhum registro encontrado" >                    
+				            </p:autoComplete>
+				            
+				            <p:outputLabel value="Lançar na conta" />
+                            <p:selectOneMenu
+                             value="#{lancamentoCaixaController.objeto.finContas}"                              
+                             converter="contasConverter">
+                               <f:selectItem itemValue="" itemLabel="Selecione"/>
+				               <f:selectItems value="#{lancamentoCaixaController.listaContas}" var="objeto"
+				                              itemLabel="#{objeto.nomeBanco}" itemValue="#{objeto}"/>
+				            </p:selectOneMenu>
+                            
+                            <p:outputLabel value="Valor" />
+                            <p:inputNumber 
+                            value="#{lancamentoCaixaController.objeto.valor}" 
+                            decimalSeparator="," thousandSeparator="."
+                            decimalPlaces="2" minValue="-100000000000">
+           					</p:inputNumber> 
+           					 
+           					<p:outputLabel value="Descrição" />
+           					<p:inputTextarea value="#{lancamentoCaixaController.objeto.descricao}" rows="6" cols="33" />                          
+                                  <br /> 
+                                  
+                                                      
+                        </h:panelGrid>
+                    </p:outputPanel>
+
+                    <p:outputPanel rendered="#{not empty lancamentoCaixaController.objeto}"
+                                   styleClass="t2ti-campo-100">
+
+                        <p:commandButton value="Incluir"
+                                         rendered="#{empty lancamentoCaixaController.objeto.id}"
+                                         actionListener="#{lancamentoCaixaController.salvar()}"
+                                         update=":form1:growl,:form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                         disabled="#{!lancamentoCaixaController.podeInserir()}" />
+                        <p:commandButton value="Alterar"
+                                         rendered="#{not empty lancamentoCaixaController.objeto.id}"
+                                         actionListener="#{lancamentoCaixaController.salvar()}"
+                                         update=":form1:growl,:form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                         disabled="#{!lancamentoCaixaController.podeAlterar()}" />
+                        <p:commandButton value="Fechar"
+                                         actionListener="#{lancamentoCaixaController.voltar()}"
+                                         update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                         process="@this" />
+
+                    </p:outputPanel>
+                </p:panel>
+            </p:outputPanel>
+
+        </p:outputPanel>
+
+    </ui:define>
+</ui:composition>

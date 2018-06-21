@@ -1,0 +1,111 @@
+
+<ui:composition template="/WEB-INF/template.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <ui:define name="gridDados">
+        <p:panel style="border: none" header="Plano de contas"
+                 rendered="#{!planoContasController.podeConsultar()}">
+            <p:outputLabel value="Você não possui acesso a esta função" />
+        </p:panel>
+
+        <p:outputPanel id="outputPanelGrid">
+
+            <p:outputPanel rendered="#{planoContasController.telaGrid}">
+
+                <p:panel id="panelCentroGrid" style="border: none" header="PlanoContas"
+                         rendered="#{planoContasController.podeConsultar()}">
+
+                    <p:dataTable id="dataTablePlanoContas" var="obj"
+                                 value="#{planoContasController.dataModel}" paginator="true" rows="10"
+                                 rowsPerPageTemplate="5,10,15,20"
+                                 selection="#{planoContasController.objetoSelecionado}"
+                                 selectionMode="single" resizableColumns="true" lazy="true">
+
+                        <f:facet name="header">
+                            <p:commandButton title="Novo" icon="ui-icon-plus"
+                                             actionListener="#{planoContasController.incluir()}"
+                                             update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                             disabled="#{!planoContasController.podeInserir()}" />
+                            <p:commandButton process="dataTablePlanoContas" title="Detalhes"
+                                             icon="ui-icon-zoom-in"
+                                             actionListener="#{planoContasController.alterar()}"
+                                             update=":form1:outputPanelGrid,:form1:outputPanelDetalhe" />
+                            <p:commandButton process="dataTablePlanoContas" title="Excluir"
+                                             icon="ui-icon-trash" actionListener="#{planoContasController.excluir()}"
+                                             update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                             disabled="#{!planoContasController.podeExcluir()}">
+                                <p:confirm header="Confirmação" message="Confirma Exclusão?"
+                                           icon="ui-icon-alert" />
+                            </p:commandButton>
+                        </f:facet>
+
+                        <p:column headerText="Descrição">
+                            <h:outputLabel value="#{obj.descricao}" />
+                        </p:column>
+                        <p:column headerText="Observação">
+                            <h:outputLabel value="#{obj.obeservacao}" />
+                        </p:column>
+                        
+                    </p:dataTable>
+                </p:panel>
+            </p:outputPanel>
+
+        </p:outputPanel>
+
+    </ui:define>
+
+    <ui:define name="telaInclusaoAlteracao">
+
+        <p:outputPanel id="outputPanelDetalhe">
+
+            <p:outputPanel rendered="#{!planoContasController.telaGrid}">
+                <p:panel id="panelCentroDetalhe" style="border: none" header="Plano de Contas">
+
+                    <p:outputLabel value="Nenhum registro selecionado."
+                                   rendered="#{empty planoContasController.objeto}" />
+                    <p:commandButton value="Voltar"
+                                     actionListener="#{planoContasController.voltar()}"
+                                     update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                     rendered="#{empty planoContasController.objeto}" />
+
+                    <p:outputPanel rendered="#{not empty planoContasController.objeto}">
+                        <h:panelGrid columns="2" cellpadding="5">
+                            <p:outputLabel value="Descrição" />
+                            <p:inputText value="#{planoContasController.objeto.descricao}" />
+                            
+                            <p:outputLabel value="Observação" />
+                            <p:inputText value="#{planoContasController.objeto.obeservacao}" />
+                                                        
+                        </h:panelGrid>
+                    </p:outputPanel>
+
+                    <p:outputPanel rendered="#{not empty planoContasController.objeto}"
+                                   styleClass="t2ti-campo-100">
+
+                        <p:commandButton value="Incluir"
+                                         rendered="#{empty planoContasController.objeto.id}"
+                                         actionListener="#{planoContasController.salvar()}"
+                                         update=":form1:growl,:form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                         disabled="#{!planoContasController.podeInserir()}" />
+                        <p:commandButton value="Alterar"
+                                         rendered="#{not empty planoContasController.objeto.id}"
+                                         actionListener="#{planoContasController.salvar()}"
+                                         update=":form1:growl,:form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                         disabled="#{!planoContasController.podeAlterar()}" />
+                        <p:commandButton value="Fechar"
+                                         actionListener="#{planoContasController.voltar()}"
+                                         update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                         process="@this" />
+
+                    </p:outputPanel>
+                </p:panel>
+            </p:outputPanel>
+
+        </p:outputPanel>
+
+    </ui:define>
+</ui:composition>

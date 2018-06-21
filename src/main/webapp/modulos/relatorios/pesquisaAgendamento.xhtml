@@ -1,0 +1,113 @@
+<ui:composition template="/WEB-INF/template.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+                
+
+	<ui:define name="gridDados">
+		
+		<h1>Pesquisa de Lançamentos</h1>
+		
+				<div class="ui-g" >
+                <div class="t2ti-campo-20" >
+				<p:outputLabel value="Data Inicial" for="dataLanc" />
+				<p:calendar id="dataLanc" size="10" 
+					 pattern="dd/MM/yyyy HH:mm" timeZone="GMT-03:00" value="#{agendamentoController.filtro.dataInicial}" />				
+				<p:spacer/>	
+				</div>
+				<div class="t2ti-campo-20" >
+				<p:outputLabel for="dataLanc2" value="Data final" />
+				<p:calendar id="dataLanc2"  size="10" 
+					pattern="dd/MM/yyyy HH:mm" timeZone="GMT-03:00" value="#{agendamentoController.filtro.dataFinal}" />
+				
+				</div>
+				
+				<div style="width:20%;
+					 float: left;
+					 padding-left: 25%;
+					 padding-right: 5%;">
+				<p:outputLabel value="Tipo" />
+                <p:selectOneMenu id="status"                         
+                      var="objeto" value="#{agendamentoController.filtro.statusServico}" >
+	                  <f:selectItem itemValue="" itemLabel="Status"/>
+					  <f:selectItems value="#{agendamentoController.statusServico}" itemValue="#{objeto}" />
+				</p:selectOneMenu>			            
+				 	 
+				 </div>
+				</div>				
+			
+			<p:toolbar style="margin-top: 20px" id="toolb">
+				<p:toolbarGroup>						
+<!-- 					<p:inputText/>					 -->
+					<p:commandButton value="Pesquisar" style="margin-top:5px;background-color:#FF69B4"
+									 actionListener="#{agendamentoController.filtrar}" 
+									 update="@form"/>					
+				</p:toolbarGroup>
+			</p:toolbar>
+			
+			</ui:define>
+
+		<ui:define name="telaInclusaoAlteracao">
+		<p:outputPanel id="outputPanelGrid">                            
+			<p:dataTable id="lancamentosTable"
+				var="lancVar" value="#{agendamentoController.agendamentos}"
+				style="margin-top: 20px" emptyMessage="Nenhum registro encontrado."
+				rows="10" paginator="true" paginatorAlwaysVisible="true"
+				rowsPerPageTemplate="5,10,15,20"
+				resizableColumns="true" reflow="true">
+                               			
+                                                               
+				
+					<f:facet name="footer">
+						<p:outputLabel value="Total: " />
+						<h:outputText value="#{agendamentoController.somarTotal}" />
+					</f:facet>									
+				
+				<p:column headerText="Data" sortBy="#{lancVar.dataInicio}" style="text-align: center; width: 180px">
+					<h:outputText value="#{lancVar.dataInicio}" >
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="GMT-03:00"/>
+					</h:outputText>
+				</p:column>
+				
+				<p:column headerText="Cliente">
+					<h:outputText value="#{lancVar.cliente.nome}" />
+				</p:column>	
+
+				<p:column headerText="Valor" style="text-align: center; width: 100px" >					
+					<h:outputLabel value="#{lancVar.valorTotal}" >
+			           <f:convertNumber pattern="R$ #,###,##0.00" />
+			        </h:outputLabel>
+				</p:column>
+				
+				<p:column headerText="Funcionario">
+					<h:outputText  />
+				</p:column>	
+				
+				<p:column headerText="Status" style="text-align: center; width: 100px">
+					<p:commandButton value="Iniciar" style="background-color:#00CED1;" 
+					rendered="#{lancVar.status == 'EM ABERTO'}" actionListener="#{agendamentoController.iniciarServico}" 
+					update=":form1">
+					<f:attribute value="#{lancVar}" name="agendamentoSelecionado" />
+					</p:commandButton>
+					<p:commandButton value="Finalizar" style="background-color:#FF69B4;" 
+					update=":form1" rendered="#{lancVar.status == 'INICIADO'}" actionListener="#{agendamentoController.finalizarServico}" >
+						<f:attribute value="#{lancVar}" name="agendamentoFinalizar" />
+					</p:commandButton>
+					
+					<p:commandButton value="Finalizado" disabled="true" rendered="#{lancVar.status == 'FINALIZADO'}"/>
+				</p:column>
+				
+			</p:dataTable>
+			</p:outputPanel>
+			</ui:define>
+			
+			<p:confirmDialog global="true">
+				<p:commandButton value="Sim" type="button"
+					styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+				<p:commandButton value="Não" type="button"
+					styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+			</p:confirmDialog>		
+	
+</ui:composition>

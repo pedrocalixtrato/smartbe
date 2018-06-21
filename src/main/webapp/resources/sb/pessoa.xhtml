@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h='http://java.sun.com/jsf/html'
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:composite="http://java.sun.com/jsf/composite"
+	xmlns:t2ti="http://xmlns.jcp.org/jsf/composite/t2ti">
+
+<composite:interface>
+	<composite:attribute name="controller"
+		type="com.t2tierp.controller.cadastros.PessoaController"
+		required="true" />
+</composite:interface>
+
+<composite:implementation>
+
+
+	<p:tabView id="telaCadastroPessoa" style="border: 0px;width: 150%;">		
+		<p:tab title="Informações da Pessoa">
+			
+			<div class="card card-w-title">
+                    <h1>Dados Principais</h1> 
+					<p:panelGrid columns="2" layout="grid"  styleClass="ui-panelgrid-blank form-group">						
+						<t2ti:campoTexto 
+							idComponente="pessoaNome" label="Nome"
+							nomeAtributo="#{cc.attrs.controller.objeto.pessoa.nome}"
+							tamanhoMaximo="150" requerido="true" />						
+
+						<t2ti:campoTexto 
+							idComponente="pessoaEmail" label="Email"
+							nomeAtributo="#{cc.attrs.controller.objeto.pessoa.email}"
+							tamanhoMaximo="250" />
+						<t2ti:campoTexto 
+							idComponente="pessoaSite" label="Site"
+							nomeAtributo="#{cc.attrs.controller.objeto.pessoa.site}"
+							tamanhoMaximo="250" />
+						<p:spacer/>
+						<t2ti:campoSelect 
+							idComponente="pessoaTipo" label="Tipo"
+							nomeAtributo="#{cc.attrs.controller.objeto.pessoa.tipo}"
+							itens="#{cc.attrs.controller.tipoPessoa}" desabilitado="true" />
+
+						<t2ti:campoSelect 
+							idComponente="pessoaCliente" label="Cliente"
+							nomeAtributo="#{cc.attrs.controller.objeto.pessoa.cliente}"
+							itens="#{cc.attrs.controller.simNao}" desabilitado="true"
+							rendered="false" />
+						<t2ti:campoSelect 
+							idComponente="pessoaFornecedor" label="Fornecedor"
+							nomeAtributo="#{cc.attrs.controller.objeto.pessoa.fornecedor}"
+							itens="#{cc.attrs.controller.simNao}" desabilitado="true"
+							rendered="false" />
+						<t2ti:campoSelect 
+							idComponente="pessoaColaborador" label="Colaborador"
+							nomeAtributo="#{cc.attrs.controller.objeto.pessoa.colaborador}"
+							itens="#{cc.attrs.controller.simNao}" desabilitado="true"
+							rendered="false" />
+						<t2ti:campoSelect 
+							idComponente="pessoaTransportadora" label="Transportadora"
+							nomeAtributo="#{cc.attrs.controller.objeto.pessoa.transportadora}"
+							itens="#{cc.attrs.controller.simNao}" desabilitado="true"
+							rendered="false" />
+						</p:panelGrid>
+				
+
+			
+				<p:outputPanel id="panelPessoaFisicaJuridica">
+					<p:outputPanel id="dadosPessoaFisica"
+						rendered="#{cc.attrs.controller.objeto.pessoa.tipo == 'F'}">
+						<h1>Dados Pessoa Física</h1> 
+						
+							<p:panelGrid columns="4" layout="grid"  styleClass="ui-panelgrid-blank form-group">	
+								<t2ti:campoCpf 
+									idComponente="pessoaFisicaCpf" label="CPF"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaFisica.cpf}"
+									requerido="true" desabilitado="true" />
+								<t2ti:campoData 
+									idComponente="pessoaFisicaDataNascimento"
+									label="Data Nascimento"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaFisica.dataNascimento}" />
+								<t2ti:campoSelect 
+									idComponente="pessoaFisicaSexo" label="Sexo"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaFisica.sexo}"
+									itens="#{cc.attrs.controller.sexo}" />
+								<t2ti:campoSelect
+									idComponente="pessoaFisicaRaca" label="Raca"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaFisica.raca}"
+									itens="#{cc.attrs.controller.racaCor}" />
+								<t2ti:campoSelect 
+									idComponente="pessoaFisicaTipoSangue" label="Tipo Sangue"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaFisica.tipoSangue}"
+									itens="#{cc.attrs.controller.tipoSangue}" />
+
+								<t2ti:campoAutoComplete 
+									label="Estado Civil" itemLabel="#{objeto.nome}"
+									controller="#{cc.attrs.controller}"
+									completeMethod="getListaEstadoCivil"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaFisica.estadoCivil}"
+									idComponente="pessoaFisicaEstadoCivil" />
+								<t2ti:campoTexto
+									idComponente="pessoaFisicaNaturalidade" label="Naturalidade"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaFisica.naturalidade}"
+									tamanhoMaximo="100" />
+								<t2ti:campoTexto 
+									idComponente="pessoaFisicaNacionalidade" label="Nacionalidade"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaFisica.nacionalidade}"
+									tamanhoMaximo="100" />
+
+								<t2ti:campoTexto 
+									idComponente="pessoaFisicaNomeMae" label="Nome Mae"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaFisica.nomeMae}"
+									tamanhoMaximo="100" />
+								<t2ti:campoTexto 
+									idComponente="pessoaFisicaNomePai" label="Nome Pai"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaFisica.nomePai}"
+									tamanhoMaximo="100" />
+							</p:panelGrid>
+																	
+					</p:outputPanel>
+				</p:outputPanel>
+				</div>
+					
+		</p:tab>
+		<p:tab title="Informações Especificas">	
+			<composite:insertChildren />
+		</p:tab>
+		<p:tab title="Dados Pessoa Juridica" rendered="#{cc.attrs.controller.objeto.pessoa.tipo == 'J'}">
+			<p:panel  header="Dados Pessoa Juridica"
+							toggleable="true" collapsed="false">
+							<div class="ui-g">
+
+
+								<t2ti:campoCnpj styleClass="t2ti-campo-20"
+									idComponente="pessoaJuridicaCnpj" label="CNPJ"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaJuridica.cnpj}"
+									requerido="true" desabilitado="true" />
+								<t2ti:campoTexto styleClass="t2ti-campo-80"
+									idComponente="pessoaJuridicaFantasia" label="Fantasia"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaJuridica.fantasia}"
+									tamanhoMaximo="150" />
+
+								<t2ti:campoTexto styleClass="t2ti-campo-30"
+									idComponente="pessoaJuridicaInscricaoMunicipal"
+									label="Inscricao Municipal"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaJuridica.inscricaoMunicipal}"
+									tamanhoMaximo="30" />
+								<t2ti:campoTexto styleClass="t2ti-campo-30"
+									idComponente="pessoaJuridicaInscricaoEstadual"
+									label="Inscricao Estadual"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaJuridica.inscricaoEstadual}"
+									tamanhoMaximo="30" />
+								<t2ti:campoTexto styleClass="t2ti-campo-20"
+									idComponente="pessoaJuridicaSuframa" label="Suframa"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaJuridica.suframa}"
+									tamanhoMaximo="9" />
+								<t2ti:campoData styleClass="t2ti-campo-20"
+									idComponente="pessoaJuridicaDataConstituicao"
+									label="Data Constituicao"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaJuridica.dataConstituicao}" />
+
+								<t2ti:campoSelect styleClass="t2ti-campo-30"
+									idComponente="pessoaJuridicaCrt" label="CRT"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaJuridica.crt}"
+									itens="#{cc.attrs.controller.crt}" />
+								<t2ti:campoSelect styleClass="t2ti-campo-30"
+									idComponente="pessoaJuridicaTipoRegime" label="Tipo Regime"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaJuridica.tipoRegime}"
+									itens="#{cc.attrs.controller.tipoRegimeEmpresa}" />
+							</div>
+						</p:panel>
+		</p:tab>
+		<p:tab title="Documentos" rendered="#{cc.attrs.controller.objeto.pessoa.tipo == 'F'}">
+			<div class="card card-w-title">
+                    <h1>Documentos</h1> 
+					<p:panelGrid columns="4" layout="grid"  styleClass="ui-panelgrid-blank form-group">
+								<t2ti:campoTexto 
+									idComponente="pessoaFisicaRg" label="RG"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaFisica.rg}"
+									tamanhoMaximo="20" />
+								<t2ti:campoTexto 
+									idComponente="pessoaFisicaOrgaoRg" label="Orgao RG"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaFisica.orgaoRg}"
+									tamanhoMaximo="20" />
+								<t2ti:campoData
+									idComponente="pessoaFisicaDataEmissaoRg"
+									label="Data Emissao Rg"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaFisica.dataEmissaoRg}" />
+								<t2ti:campoTexto 
+									idComponente="pessoaFisicaCnhNumero" label="CNH Numero"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaFisica.cnhNumero}"
+									tamanhoMaximo="20" />
+								<t2ti:campoTexto 
+									idComponente="pessoaFisicaCnhCategoria" label="CNH Categoria"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaFisica.cnhCategoria}"
+									tamanhoMaximo="2" />
+								<t2ti:campoData 
+									idComponente="pessoaFisicaCnhVencimento" label="CNH Vencimento"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaFisica.cnhVencimento}" />
+
+								<t2ti:campoTexto 
+									idComponente="pessoaFisicaTituloEleitoralNumero"
+									label="Titulo Eleitoral Numero"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaFisica.tituloEleitoralNumero}"
+									tamanhoMaximo="20" />
+								<t2ti:campoInteiro
+									idComponente="pessoaFisicaTituloEleitoralZona" label="Zona"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaFisica.tituloEleitoralZona}" />
+								<t2ti:campoInteiro 
+									idComponente="pessoaFisicaTituloEleitoralSecao" label="Secao"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaFisica.tituloEleitoralSecao}" />
+
+								<t2ti:campoTexto 
+									idComponente="pessoaFisicaReservistaNumero"
+									label="Reservista Numero"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaFisica.reservistaNumero}"
+									tamanhoMaximo="20" />
+								<t2ti:campoInteiro 
+									idComponente="pessoaFisicaReservistaCategoria"
+									label="Reservista Categoria"
+									nomeAtributo="#{cc.attrs.controller.objeto.pessoa.pessoaFisica.reservistaCategoria}" />
+
+								</p:panelGrid>
+							</div>									
+			
+		</p:tab>
+
+		<p:tab title="Contatos">
+
+			<p:dataTable id="dataTablePessoaContato" var="obj"
+				value="#{cc.attrs.controller.objeto.pessoa.listaPessoaContato}"
+				paginator="true" rows="10" rowsPerPageTemplate="5,10,15,20" reflow="true"
+				selection="#{cc.attrs.controller.pessoaContatoSelecionado}"
+				selectionMode="single" rowKey="#{obj.id}" paginatorPosition="bottom">
+
+				<f:facet name="header">
+
+					<p:commandButton title="Novo" icon="ui-icon-plus"
+						process="dataTablePessoaContato"
+						actionListener="#{cc.attrs.controller.incluirContato}"
+						oncomplete="PF('dialogContato').show()"
+						update=":campoPessoaContato:formOutrasTelas:panelPessoaContato,dataTablePessoaContato"/>
+					<p:commandButton process="dataTablePessoaContato" title="Detalhes"
+						icon="ui-icon-zoom-in"
+						actionListener="#{cc.attrs.controller.alterarContato}"
+						oncomplete="PF('dialogContato').show()"
+						update=":campoPessoaContato:formOutrasTelas:panelPessoaContato,:campoPessoaContato:formOutrasTelas:dialogContato" />
+					<p:commandButton process="dataTablePessoaContato" title="Excluir"
+						icon="ui-icon-trash" update="dataTablePessoaContato"
+						actionListener="#{cc.attrs.controller.excluirContato}">
+						<p:confirm header="Confirmação" message="Confirma Exclusão?"
+							icon="ui-icon-alert" />
+					</p:commandButton>
+
+				</f:facet>
+
+				<p:column headerText="Nome">
+					<h:outputLabel value="#{obj.nome}" />
+				</p:column>
+				<p:column headerText="Email">
+					<h:outputLabel value="#{obj.email}" />
+				</p:column>
+				<p:column headerText="Fone Comercial">
+					<h:outputLabel value="#{obj.foneComercial}" />
+				</p:column>
+				<p:column headerText="Fone Residencial">
+					<h:outputLabel value="#{obj.foneResidencial}" />
+				</p:column>
+				<p:column headerText="Fone Celular">
+					<h:outputLabel value="#{obj.foneCelular}" />
+				</p:column>
+			</p:dataTable>
+
+		</p:tab>
+
+		<p:tab title="Endereços"
+			disabled="#{empty cc.attrs.controller.objeto.id}">
+
+			<p:dataTable id="dataTablePessoaEndereco" var="obj"
+				value="#{cc.attrs.controller.objeto.pessoa.listaPessoaEndereco}"
+				paginator="true" rows="10" rowsPerPageTemplate="5,10,15,20"
+				selection="#{cc.attrs.controller.pessoaEnderecoSelecionado}" reflow="true"
+				selectionMode="single" rowKey="#{obj.id}" paginatorPosition="bottom">
+
+				<f:facet name="header">
+					<p:commandButton title="Novo" icon="ui-icon-plus"
+						process="dataTablePessoaEndereco"
+						actionListener="#{clienteController.incluirEndereco()}"
+						oncomplete="PF('dialogEndereco').show()"
+						update=":campoPessoaEndereco:formOutrasTelas2:panelPessoaEndereco,dataTablePessoaEndereco" />
+					<p:commandButton process="dataTablePessoaEndereco" title="Detalhes"
+						icon="ui-icon-zoom-in"
+						actionListener="#{cc.attrs.controller.alterarEndereco}"
+						oncomplete="PF('dialogEndereco').show()"
+						update=":campoPessoaEndereco:formOutrasTelas2:panelPessoaEndereco,:campoPessoaEndereco:formOutrasTelas2:dialogEndereco" />
+					<p:commandButton process="dataTablePessoaEndereco" title="Excluir"
+						icon="ui-icon-trash" update="dataTablePessoaEndereco"
+						actionListener="#{cc.attrs.controller.excluirEndereco}">
+						<p:confirm header="Confirmação" message="Confirma Exclusão?"
+							icon="ui-icon-alert" />
+					</p:commandButton>
+				</f:facet>
+
+				<p:column headerText="Cidade">
+					<h:outputLabel value="#{obj.cidade}" />
+				</p:column>
+				<p:column headerText="Uf">
+					<h:outputLabel value="#{obj.uf}" />
+				</p:column>
+				<p:column headerText="Fone">
+					<h:outputLabel value="#{obj.fone}" />
+				</p:column>
+				<p:column headerText="Principal">
+					<h:outputLabel
+						value="#{cc.attrs.controller.keyFromValue(cc.attrs.controller.simNao, obj.principal)}" />
+						
+				</p:column>
+				<p:column headerText="Entrega">
+					<h:outputLabel
+						value="#{cc.attrs.controller.keyFromValue(cc.attrs.controller.simNao, obj.entrega)}" />
+				</p:column>
+				<p:column headerText="Cobranca">
+					<h:outputLabel
+						value="#{cc.attrs.controller.keyFromValue(cc.attrs.controller.simNao, obj.cobranca)}" />
+				</p:column>
+				<p:column headerText="Correspondencia">
+					<h:outputLabel
+						value="#{cc.attrs.controller.keyFromValue(cc.attrs.controller.simNao, obj.correspondencia)}" />
+				</p:column>
+
+			</p:dataTable>
+
+		</p:tab>
+
+		<p:tab title="Telefones"
+			disabled="#{empty cc.attrs.controller.objeto.id}">
+
+			<p:dataTable id="dataTablePessoaTelefone" var="obj"
+				value="#{cc.attrs.controller.objeto.pessoa.listaPessoaTelefone}"
+				paginator="true" rows="10" rowsPerPageTemplate="5,10,15,20"
+				selection="#{cc.attrs.controller.pessoaTelefoneSelecionado}" reflow="true"
+				selectionMode="single" rowKey="#{obj.id}" paginatorPosition="bottom">
+
+				<f:facet name="header">
+					<p:commandButton title="Novo" icon="ui-icon-plus"
+						process="dataTablePessoaTelefone"
+						actionListener="#{cc.attrs.controller.incluirTelefone}"
+						oncomplete="PF('dialogTelefone').show()"
+						update="campoPessoaTelefone:formOutrasTelas3:panelPessoaTelefone,dataTablePessoaTelefone" />
+					<p:commandButton process="dataTablePessoaTelefone" title="Detalhes"
+						icon="ui-icon-zoom-in"
+						actionListener="#{cc.attrs.controller.alterarTelefone()}"
+						oncomplete="PF('dialogTelefone').show()"
+						update=":campoPessoaTelefone:formOutrasTelas3:panelPessoaTelefone,:campoPessoaTelefone:formOutrasTelas3:dialogTelefone" />
+					<p:commandButton process="dataTablePessoaTelefone" title="Excluir"
+						icon="ui-icon-trash" update="dataTablePessoaTelefone"
+						actionListener="#{cc.attrs.controller.excluirTelefone()}">
+						<p:confirm header="Confirmação" message="Confirma Exclusão?"
+							icon="ui-icon-alert" />
+					</p:commandButton>
+				</f:facet>
+
+				<p:column headerText="Tipo">
+					<h:outputLabel
+						value="#{cc.attrs.controller.keyFromValue(cc.attrs.controller.tipoTelefone, obj.tipo)}" />
+				</p:column>
+				<p:column headerText="Numero">
+					<h:outputLabel value="#{obj.numero}" />
+				</p:column>
+				<p:column headerText="Observacao">
+					<h:outputLabel value="#{obj.observacao}" />
+				</p:column>
+			</p:dataTable>
+		</p:tab>
+	</p:tabView>
+
+</composite:implementation>
+
+</html>

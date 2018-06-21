@@ -1,0 +1,55 @@
+<ui:composition 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:pa="http://primefaces.org/barcelona">
+    
+    
+    <div class="layout-sidebar layout-sidebar-dark" >
+   
+        <pa:tabMenu>
+            <pa:tab icon="home" title="Home" >
+                <h:form id="menu-form">
+                    <pa:menu widgetVar="me"> 
+                            <p:menuitem id="menu3" value="Inicio" icon="&#xE871;" outcome="/index.xhtml" ajax="false"/> 
+                    </pa:menu>
+                </h:form>
+            </pa:tab> 
+            
+            <pa:tab icon="event_available" title="Agendamento">            
+                <h:form >
+                    <pa:menu widgetVar="me">                    	   
+                          <p:menuitem  value="Agendamento" outcome="/modulos/cadastros/agendamentoB.xhtml" ajax="false"/>
+                          <p:menuitem  value="Consultar agendamentos" outcome="/modulos/relatorios/pesquisaAgendamento.xhtml" ajax="false"/>
+                    </pa:menu>
+                </h:form>
+            </pa:tab> 
+            
+            <pa:tab icon="&#xE89C;" title="Cadastros">            
+                <h:form >                   
+                    
+                    <pa:menu widgetVar="me">                           
+                          <p:menuitem id="menu4" value="Serviços"  outcome="/modulos/cadastros/servico.xhtml" ajax="false"/>
+                          <p:menuitem id="menu5" value="Funcionarios"  outcome="/modulos/cadastros/funcionario.xhtml" ajax="false"/>  
+                          <p:menuitem id="menu6" value="Clientes"  outcome="/modulos/cadastros/cliente.xhtml" ajax="false"/>
+                    </pa:menu>
+                </h:form>
+            </pa:tab>   
+            
+            <pa:tab icon="&#xE227;" title="Financeiro">            
+                <h:form >
+                    <pa:menu widgetVar="me">
+                    	  <p:menuitem  value="Lançamentos Manual" outcome="/modulos/financeiro/lancamentoCaixa.xhtml" ajax="false"/>                           
+                          <p:menuitem  value="Contas" outcome="/modulos/financeiro/contas.xhtml" ajax="false"/>  
+                          <p:menuitem  value="Plano de contas" outcome="/modulos/financeiro/planoContas.xhtml" ajax="false"/>
+                          <p:menuitem  value="Contas pagar" outcome="/modulos/financeiro/contasPagar.xhtml" ajax="false"/>
+                    </pa:menu>
+                </h:form>
+            </pa:tab>          	 	
+       	 	      	 	
+        </pa:tabMenu>                
+    </div>
+   
+</ui:composition>

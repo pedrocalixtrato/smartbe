@@ -1,0 +1,38 @@
+
+<ui:composition template="/WEB-INF/template.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <ui:define name="gridDados">
+      
+         <div class="ui-g dashboard">   
+        <div class="ui-g-12 activity-feed">
+                <p:panel header="RESUMO FINANCEIRO" styleClass="ui-shadow-content">
+                    <h3>HOJE</h3>
+                    <p>Updated 1 minute ago</p>
+                    <div class="ui-g">
+                        <div class="ui-g-12 ui-md-3">
+                            <span>A PAGAR</span>
+                            <div class="knob income">R$900</div>
+                        </div>
+                        <div class="ui-g-12 ui-md-3">
+                            <span>A RECEBER</span>
+                            <div class="knob tax">R$250</div>
+                        </div>
+                        <div class="ui-g-12 ui-md-3">
+                            <span>SALDO</span>
+                            <div class="knob invoice">R$125</div>
+                        </div>
+                        <div class="ui-g-12 ui-md-3">
+                            <span>EXPENSES</span>
+                            <div class="knob expense">$250</div>
+                        </div>
+                    </div>
+                </p:panel>
+            </div>
+            </div>
+           
+    </ui:define>
+
+</ui:composition>

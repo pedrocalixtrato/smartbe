@@ -1,0 +1,76 @@
+
+<ui:composition template="/WEB-INF/template.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sb="http://java.sun.com/jsf/composite/sb"
+	xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+
+
+	<ui:define name="gridDados">
+
+		<sb:gridDados id="telaGrid" controller="#{funcionarioController}"
+			idDataTable="dataTableFuncionario" nomeFuncao="Funcionario">
+
+			<p:column headerText="Nome">
+				<h:outputLabel value="#{obj.nome}" />
+			</p:column>			
+			<p:column headerText="Telefone">
+				<h:outputLabel value="#{obj.telefone}" />
+			</p:column>
+			<p:column headerText="Valor">
+				<h:outputLabel value="#{obj.media_valor}" >
+					 <f:convertNumber pattern="R$ #,##0.00" />
+				</h:outputLabel>
+			</p:column>			
+		</sb:gridDados>
+
+	</ui:define>
+
+	<ui:define name="telaInclusaoAlteracao">
+
+
+		 <sb:telaInclusaoAlteracao id="telaDetalhe"
+                                    controller="#{funcionarioController}"
+                                    nomeFuncao="Funcionario">
+            <div class="ui-g" >   
+             
+            <sb:campoTexto styleClass="t2ti-campo-50"
+                             idComponente="funcionarioNome" label="Nome"
+                             nomeAtributo="#{funcionarioController.objeto.nome}"
+                             tamanhoMaximo="100"
+                             requerido="true"/>
+                             
+             <sb:campoData styleClass="t2ti-campo-20"
+                            idComponente="produtoDataCadastro" label="Data de nascimento"
+                            nomeAtributo="#{funcionarioController.objeto.data_nascimento}" />
+             
+             <sb:campoSelect styleClass="t2ti-campo-20"
+                              idComponente="funcionarioFuncao" label="Função"
+                              nomeAtributo="#{funcionarioController.objeto.funcao}"
+                              itens="#{funcionarioController.funcao}" />            
+                             
+            <sb:campoTexto styleClass="t2ti-campo-20"
+                             idComponente="funcionarioTelefone" label="Telefone"
+                             nomeAtributo="#{funcionarioController.objeto.telefone}"
+                             tamanhoMaximo="30"
+                             requerido="true"/>
+                             
+            <sb:campoDecimal styleClass="t2ti-campo-20"
+                               idComponente="funcionarioValor" label="Media valor"
+                               nomeAtributo="#{funcionarioController.objeto.media_valor}"/> 
+
+            <sb:campoAreaTexto styleClass="t2ti-campo-100"
+                                 idComponente="funcionarioObservacao" label="Obeservação"
+                                 nomeAtributo="#{funcionarioController.objeto.observacao}" />
+            
+		</div>
+        </sb:telaInclusaoAlteracao>
+
+
+	</ui:define>
+	
+
+</ui:composition>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:composite="http://java.sun.com/jsf/composite"
+      xmlns:h="http://java.sun.com/jsf/html">
+
+    <composite:interface>
+        <composite:attribute name="idComponente" required="true" />
+        <composite:attribute name="label" required="true"/>
+        <composite:attribute name="itemLabel" required="true"/>
+        <composite:attribute name="completeMethod" required="true"/>
+        <composite:attribute name="nomeAtributo" required="true"/>
+        <composite:attribute name="requerido" default="true"/>
+        <composite:attribute name="styleClass" />
+        <composite:attribute name="controller" required="true"/>
+        <composite:clientBehavior name="itemSelecionado" targets="#{cc.attrs.idComponente}" event="itemSelect" />
+    </composite:interface>
+
+    <composite:implementation>
+        <div class="#{cc.attrs.styleClass}">
+            <p:outputLabel value="#{cc.attrs.label}"
+                           for="#{cc.attrs.idComponente}" />
+            <br />
+            <h:panelGroup styleClass="md-inputfield"  style="width: 100%" >           
+          
+            <p:autoComplete id="#{cc.attrs.idComponente}"
+           					dropdown="true"           					
+                            value="#{cc.attrs.nomeAtributo}"
+                            completeMethod="#{cc.attrs.controller[cc.attrs.completeMethod]}" var="objeto"
+                            itemLabel="#{cc.attrs.itemLabel}" itemValue="#{objeto}"
+                            converter="com.smartbe.model.bean.converter.defaultConverter" forceSelection="true"
+                            minQueryLength="3" maxResults="10" required="#{cc.attrs.requerido}"
+                            style="width: 100%" emptyMessage="Nenhum registro encontrado" >                 
+                <composite:insertChildren />
+                    
+            </p:autoComplete>
+                    
+                 <i class="fa fa-search" style="position: absolute;right: 6px;top: 2px;" ></i>
+                       
+            
+                        
+            
+            </h:panelGroup>
+        </div>
+    </composite:implementation>
+
+</html>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:composite="http://java.sun.com/jsf/composite">
+
+    <composite:interface>
+        <composite:attribute name="idComponente" />
+        <composite:attribute name="label" />
+        <composite:attribute name="nomeAtributo" />
+        <composite:attribute name="requerido" />
+        <composite:attribute name="styleClass" />
+        <composite:attribute name="somenteLeitura" default="false" />
+    </composite:interface>
+
+    <composite:implementation>
+        <div class="#{cc.attrs.styleClass}" id="#{cc.id}">
+            <p:outputLabel value="#{cc.attrs.label}"
+                           for="#{cc.attrs.idComponente}" />
+            <br />
+            <p:inputNumber id="#{cc.attrs.idComponente}" size="70"
+            			   style="text-align: left;"
+                           value="#{cc.attrs.nomeAtributo}" required="#{cc.attrs.requerido}"
+                           decimalSeparator="," thousandSeparator="."
+                           decimalPlaces="2" minValue="-100000000000"
+                           disabled="#{cc.attrs.somenteLeitura}">
+            </p:inputNumber>
+        </div>
+    </composite:implementation>
+
+</html>

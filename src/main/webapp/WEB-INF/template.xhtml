@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+<h:outputStylesheet name="css/t2tierp.css" />
+	<f:facet name="first">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+	</f:facet>
+	<title><ui:insert name="title">Smart Beauty</ui:insert></title>
+	<h:outputScript name="js/nanoscroller.js" library="barcelona-layout" />
+	<h:outputScript name="js/layout.js" library="barcelona-layout" />
+	<h:outputScript name="js/ripple.js" library="barcelona-layout" />
+	<ui:insert name="head" />
+	
+	
+	<script type="text/javascript">
+               //<![CDATA[
+               function skinBar() {
+                   this.cfg.shadow = false;
+                   this.cfg.title = '';
+                   this.cfg.seriesColors = ['#64B5F6', '#FFD54F'];
+                   this.cfg.grid = {
+                       background: '#ffffff',
+                       borderColor: '#ffffff',
+                       gridLineColor: '#F5F5F5',
+                       shadow: false
+                   };
+                   this.cfg.axesDefaults = {
+                       borderWidth: 0.1,
+                       borderColor: 'bdbdbd',
+                       rendererOptions: {
+                           textColor: '#666F77'
+                       }
+                   };
+                   this.cfg.seriesDefaults = {
+                       shadow: false,
+                       lineWidth: 1,
+                       renderer: $.jqplot.BarRenderer,
+                       markerOptions: {
+                           shadow: false,
+                           size: 7,
+                           style: 'circle'
+                       }
+                   }
+               }
+               //]]>  
+           </script>
+           <style type="text/css">
+               .main-content {
+                   padding: 0;
+               }
+           </style>
+	
+	
+</h:head>
+
+<h:body styleClass="main-body">
+
+	<p:ajaxStatus onstart="PF('statusDialog').show();"
+		onsuccess="PF('statusDialog').hide();" />
+
+	<p:dialog modal="true" widgetVar="statusDialog" header="Carregando..."
+		draggable="false" closable="false" resizable="false">
+		<p:graphicImage value="/resources/images/loading_ajax.gif" />
+	</p:dialog>
+
+	<div
+		class="layout-wrapper #{guestPreferences.overlayMenu ? 'layout-overlay-menu' : null} #{guestPreferences.orientationRTL ? 'layout-rtl' : null}">
+		<ui:include src="./topbar.xhtml" />
+		<ui:include src="./menu.xhtml" />
+		<h:form id="form1">
+
+			<p:confirmDialog global="true" showEffect="fade" hideEffect="explode">
+				<p:commandButton value="Sim" type="button"
+					styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+				<p:commandButton value="Não" type="button"
+					styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+			</p:confirmDialog>
+
+
+
+			<div class="layout-main">
+				<div class="layout-main-content">
+					<p:growl id="growl" life="3000" />					
+						<div class="ui-g">
+							<div class="ui-g-12">
+								
+									
+									<div class="card card-w-title" style="padding-bottom:auto;">
+									<ui:insert name="gridDados" />
+									<ui:insert name="telaInclusaoAlteracao" />
+									</div>
+								
+							</div>
+						</div>		
+					<ui:include src="./footer.xhtml" />
+				</div>
+			</div>
+		</h:form>
+
+	</div>
+
+
+	<p:ajaxStatus
+		style="width:32px;height:32px;position:fixed;right:7px;bottom:7px">
+		<f:facet name="start">
+			<i class="fa fa-circle-o-notch fa-spin ajax-loader"
+				aria-hidden="true"></i>
+		</f:facet>
+
+		<f:facet name="complete">
+			<h:outputText value="" />
+		</f:facet>
+	</p:ajaxStatus>
+           
+		<ui:insert name="outrasTelas" />
+		<ui:insert name="outrasTelas2" />
+		<ui:insert name="outrasTelas3" />
+		<ui:insert name="outrasTelas4" />
+		<ui:insert name="outrasTelas5" />
+	
+	<h:outputStylesheet name="css/nanoscroller.css"
+		library="barcelona-layout" />
+	<h:outputStylesheet name="css/animate.css" library="barcelona-layout" />
+	<h:outputStylesheet name="css/ripple.css" library="barcelona-layout" />
+	<h:outputStylesheet name="css/layout-deep-purple.css"
+		library="barcelona-layout" />
+	<h:outputStylesheet name="css/t2tierp.css" />
+</h:body>
+
+</html>

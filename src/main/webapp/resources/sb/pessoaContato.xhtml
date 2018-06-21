@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h='http://java.sun.com/jsf/html'
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:composite="http://java.sun.com/jsf/composite"
+      xmlns:t2ti="http://xmlns.jcp.org/jsf/composite/t2ti">
+
+    <composite:interface>
+        <composite:attribute name="controller" type="com.t2tierp.controller.cadastros.PessoaController" required="true" />
+    </composite:interface>
+
+    <composite:implementation>
+
+        <h:form id="formOutrasTelas">
+            <p:dialog id="dialogContato" header="Inclusão/Alteração de Contato"
+                      widgetVar="dialogContato" showEffect="slide" hideEffect="slide"
+                      resizable="true" modal="true" closable="false" responsive="true">
+				<div class="card card-w-title">
+                    <h1>Contato</h1> 
+				
+                	<p:outputPanel id="panelPessoaContato">
+                	<p:panelGrid columns="3" layout="grid"  styleClass="ui-panelgrid-blank form-group">	
+                    <t2ti:campoTexto 
+                                     idComponente="pessoaContatoNome" label="Nome"
+                                     nomeAtributo="#{cc.attrs.controller.pessoaContato.nome}"
+                                     tamanhoMaximo="100" />
+                    <t2ti:campoTexto
+                                     idComponente="pessoaContatoEmail" label="Email"
+                                     nomeAtributo="#{cc.attrs.controller.pessoaContato.email}"
+                                     tamanhoMaximo="250" />
+
+                    <t2ti:campoTexto 
+                                     idComponente="pessoaContatoFoneComercial" label="Fone Comercial"
+                                     nomeAtributo="#{cc.attrs.controller.pessoaContato.foneComercial}"
+                                     tamanhoMaximo="14" />
+                    <t2ti:campoTexto 
+                                     idComponente="pessoaContatoFoneResidencial"
+                                     label="Fone Residencial"
+                                     nomeAtributo="#{cc.attrs.controller.pessoaContato.foneResidencial}"
+                                     tamanhoMaximo="14" />
+                    <t2ti:campoTexto 
+                                     idComponente="pessoaContatoFoneCelular" label="Fone Celular"
+                                     nomeAtributo="#{cc.attrs.controller.pessoaContato.foneCelular}"
+                                     tamanhoMaximo="14" />
+                        </p:panelGrid>
+                </p:outputPanel>
+                         </div>       
+                    <p:commandButton value="Salvar"
+                                     actionListener="#{cc.attrs.controller.salvarContato}"
+                                     update=":campoPessoaContato:formOutrasTelas:panelPessoaContato,:form1:growl,:form1:telaDetalhe:campoPessoa:telaCadastroPessoa:dataTablePessoaContato"
+                                     oncomplete="if (!args.validationFailed) {PF('dialogContato').hide();}" />
+                    <p:commandButton value="Cancelar"
+                                     oncomplete="PF('dialogContato').hide();" />			
+              
+			
+			 </p:dialog>
+        </h:form>
+
+    </composite:implementation>
+
+</html>

@@ -1,0 +1,137 @@
+<ui:composition template="/WEB-INF/template.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <ui:define name="gridDados">
+        <p:panel style="border: none" header="Cliente"
+                 rendered="#{!clienteController.podeConsultar()}">
+            <p:outputLabel value="Você não possui acesso a esta função" />
+        </p:panel>
+
+        <p:outputPanel id="outputPanelGrid">
+            <p:outputPanel rendered="#{clienteController.telaGrid}">
+                <p:panel id="panelCentroGrid" style="border: none" header="Clientes"
+                         rendered="#{clienteController.podeConsultar()}">
+
+                    <p:dataTable id="dataTableCliente" var="obj"
+                                 value="#{clienteController.dataModel}" paginator="true" rows="10"
+                                 rowsPerPageTemplate="5,10,15,20"
+                                 selection="#{clienteController.objetoSelecionado}"
+                                 selectionMode="single" resizableColumns="true" lazy="true">
+
+                        <f:facet name="header">
+                            <p:commandButton title="Novo" icon="ui-icon-plus"
+                                             actionListener="#{clienteController.incluir()}"
+                                             update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                             disabled="#{!clienteController.podeInserir()}" />
+                            <p:commandButton process="dataTableCliente" title="Detalhes"
+                                             icon="ui-icon-zoom-in"
+                                             actionListener="#{clienteController.alterar()}"
+                                             update=":form1:outputPanelGrid,:form1:outputPanelDetalhe" />
+                            <p:commandButton process="dataTableCliente" title="Excluir"
+                                             icon="ui-icon-trash" actionListener="#{clienteController.excluir()}"
+                                             update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                             disabled="#{!clienteController.podeExcluir()}">
+                                <p:confirm header="Confirmação" message="Confirma Exclusão?"
+                                           icon="ui-icon-alert" />
+                            </p:commandButton>
+                        </f:facet>
+                        
+                        <p:column headerText="Nome">
+			                <h:outputLabel value="#{obj.nome}" />
+			            </p:column>			            
+			            
+			            <p:column headerText="Telefone">
+			                 <h:outputLabel value="#{obj.telefone}" />
+			            </p:column>
+			            
+			            <p:column headerText="Data Nascimento">
+			                 <h:outputLabel value="#{obj.dataNascimento}" >
+			                    <f:convertDateTime pattern="dd/MM/yyyy" />
+			                 </h:outputLabel>
+			            </p:column>
+			                        
+			            <p:column headerText="Bairro">
+			                 <h:outputLabel value="#{obj.bairro}" />
+			            </p:column>			            
+			            
+                    </p:dataTable>
+                </p:panel>
+            </p:outputPanel>
+
+        </p:outputPanel>
+
+    </ui:define>
+
+    <ui:define name="telaInclusaoAlteracao">
+        <p:outputPanel id="outputPanelDetalhe">
+            <p:outputPanel rendered="#{!clienteController.telaGrid}">
+                <p:panel id="panelCentroDetalhe" style="border:none" header="Cliente">
+                    <p:outputLabel value="Nenhum registro selecionado."
+                                   rendered="#{empty clienteController.objeto}" />
+                    <p:commandButton value="Voltar"
+                                     actionListener="#{clienteController.voltar()}"
+                                     update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                     rendered="#{empty clienteController.objeto}" />
+				
+                    <p:outputPanel rendered="#{not empty clienteController.objeto}">
+                    
+                            <div class="ui-g" >                        
+                            <div class="t2ti-campo-80" >               
+                            <p:outputLabel value="Nome" />
+                            <p:inputText  value="#{clienteController.objeto.nome}" />
+                            </div>                                                        
+                            
+                            <div class="t2ti-campo-20" >
+                            <p:outputLabel value="Data nascimento" />
+                            <p:calendar  
+                             value="#{clienteController.objeto.dataNascimento}"
+                             pattern="dd/MM/yyyy" />
+                             </div>                            
+                             <div class="t2ti-campo-30" >
+                            <p:outputLabel value="Telefone" />                           			            
+				            <p:inputText value="#{clienteController.objeto.telefone}" />
+				            </div>
+				            <div class="t2ti-campo-40" >
+				            <p:outputLabel value="Email" />                           			            
+				            <p:inputText  value="#{clienteController.objeto.email}" />
+				            </div> 
+				             
+				            <div class="t2ti-campo-30" >
+				            <p:outputLabel value="Bairro" />                           			            
+				            <p:inputText value="#{clienteController.objeto.bairro}" />  
+				            </div>
+				            </div> 
+           					<br />              
+                       
+                    </p:outputPanel>
+
+                    <p:outputPanel rendered="#{not empty clienteController.objeto}"
+                                   styleClass="t2ti-campo-100">
+
+                        <p:commandButton value="Incluir"
+                                         rendered="#{empty clienteController.objeto.id}"
+                                         actionListener="#{clienteController.salvar()}"
+                                         update=":form1:growl,:form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                         disabled="#{!clienteController.podeInserir()}" />
+                        <p:commandButton value="Alterar"
+                                         rendered="#{not empty clienteController.objeto.id}"
+                                         actionListener="#{clienteController.salvar()}"
+                                         update=":form1:growl,:form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                         disabled="#{!clienteController.podeAlterar()}" />
+                        <p:commandButton value="Fechar"
+                                         actionListener="#{clienteController.voltar()}"
+                                         update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                         process="@this" />
+
+                    </p:outputPanel>
+                </p:panel>
+            </p:outputPanel>
+
+        </p:outputPanel>
+
+    </ui:define>
+</ui:composition>

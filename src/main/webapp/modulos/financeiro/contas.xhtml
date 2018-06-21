@@ -1,0 +1,118 @@
+
+<ui:composition template="/WEB-INF/template.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <ui:define name="gridDados">
+        <p:panel style="border: none" header="Contas"
+                 rendered="#{!contasController.podeConsultar()}">
+            <p:outputLabel value="Você não possui acesso a esta função" />
+        </p:panel>
+
+        <p:outputPanel id="outputPanelGrid">
+
+            <p:outputPanel rendered="#{contasController.telaGrid}">
+
+                <p:panel id="panelCentroGrid" style="border: none" header="Contas"
+                         rendered="#{contasController.podeConsultar()}">
+
+                    <p:dataTable id="dataTableContas" var="obj"
+                                 value="#{contasController.dataModel}" paginator="true" rows="10"
+                                 rowsPerPageTemplate="5,10,15,20"
+                                 selection="#{contasController.objetoSelecionado}"
+                                 selectionMode="single" resizableColumns="true" lazy="true">
+
+                        <f:facet name="header">
+                            <p:commandButton title="Novo" icon="ui-icon-plus"
+                                             actionListener="#{contasController.incluir()}"
+                                             update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                             disabled="#{!contasController.podeInserir()}" />
+                            <p:commandButton process="dataTableContas" title="Detalhes"
+                                             icon="ui-icon-zoomin"
+                                             actionListener="#{contasController.alterar()}"
+                                             update=":form1:outputPanelGrid,:form1:outputPanelDetalhe" />
+                            <p:commandButton process="dataTableContas" title="Excluir"
+                                             icon="ui-icon-trash" actionListener="#{contasController.excluir()}"
+                                             update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                             disabled="#{!contasController.podeExcluir()}">
+                                <p:confirm header="Confirmação" message="Confirma Exclusão?"
+                                           icon="ui-icon-alert" />
+                            </p:commandButton>
+                        </f:facet>
+
+                        <p:column headerText="Nome">
+                            <h:outputLabel value="#{obj.nomeTitular}" />
+                        </p:column>
+                        <p:column headerText="Banco">
+                            <h:outputLabel value="#{obj.nomeBanco}" />
+                        </p:column>
+                        <p:column headerText="Numero Conta">
+                            <h:outputLabel value="#{obj.numeroConta}" />
+                        </p:column>
+                    </p:dataTable>
+                </p:panel>
+            </p:outputPanel>
+
+        </p:outputPanel>
+
+    </ui:define>
+
+    <ui:define name="telaInclusaoAlteracao">
+
+        <p:outputPanel id="outputPanelDetalhe">
+
+            <p:outputPanel rendered="#{!contasController.telaGrid}">
+                <p:panel id="panelCentroDetalhe" style="border: none" header="Contas">
+
+                    <p:outputLabel value="Nenhum registro selecionado."
+                                   rendered="#{empty contasController.objeto}" />
+                    <p:commandButton value="Voltar"
+                                     actionListener="#{contasController.voltar()}"
+                                     update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                     rendered="#{empty contasController.objeto}" />
+
+                    <p:outputPanel rendered="#{not empty contasController.objeto}">
+                        <h:panelGrid columns="2" cellpadding="5">
+                            <p:outputLabel value="Banco" />
+                            <p:inputText value="#{contasController.objeto.nomeBanco}" />
+                            
+                            <p:outputLabel value="Nome do Titular" />
+                            <p:inputText value="#{contasController.objeto.nomeTitular}" />
+
+                            <p:outputLabel value="Numero da Agencia" />
+                            <p:inputText value="#{contasController.objeto.numeroAgencia}" />
+                            
+                            <p:outputLabel value="Numero da Conta" />
+                            <p:inputText value="#{contasController.objeto.numeroConta}" />
+                        </h:panelGrid>
+                    </p:outputPanel>
+
+                    <p:outputPanel rendered="#{not empty contasController.objeto}"
+                                   styleClass="t2ti-campo-100">
+
+                        <p:commandButton value="Incluir"
+                                         rendered="#{empty contasController.objeto.id}"
+                                         actionListener="#{contasController.salvar()}"
+                                         update=":form1:growl,:form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                         disabled="#{!contasController.podeInserir()}" />
+                        <p:commandButton value="Alterar"
+                                         rendered="#{not empty contasController.objeto.id}"
+                                         actionListener="#{contasController.salvar()}"
+                                         update=":form1:growl,:form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                         disabled="#{!contasController.podeAlterar()}" />
+                        <p:commandButton value="Fechar"
+                                         actionListener="#{contasController.voltar()}"
+                                         update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                         process="@this" />
+
+                    </p:outputPanel>
+                </p:panel>
+            </p:outputPanel>
+
+        </p:outputPanel>
+
+    </ui:define>
+</ui:composition>

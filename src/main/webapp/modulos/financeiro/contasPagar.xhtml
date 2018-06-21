@@ -1,0 +1,165 @@
+<ui:composition template="/WEB-INF/template.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <ui:define name="gridDados">
+        <p:panel style="border: none" header="Contas a pagar"
+                 rendered="#{!contasAPagarController.podeConsultar()}">
+            <p:outputLabel value="Você não possui acesso a esta função" />
+        </p:panel>
+
+        <p:outputPanel id="outputPanelGrid">
+
+            <p:outputPanel rendered="#{contasAPagarController.telaGrid}">
+                <p:panel id="panelCentroGrid" style="border: none" header="Contas a pagar"
+                         rendered="#{contasAPagarController.podeConsultar()}">
+
+                    <p:dataTable id="dataTableContasPagar" var="obj"
+                                 value="#{contasAPagarController.dataModel}" paginator="true" rows="10"
+                                 rowsPerPageTemplate="5,10,15,20"
+                                 selection="#{contasAPagarController.objetoSelecionado}"
+                                 selectionMode="single" resizableColumns="true" lazy="true">
+
+                        <f:facet name="header">
+                            <p:commandButton title="Novo" icon="ui-icon-plus"
+                                             actionListener="#{contasAPagarController.incluir()}"
+                                             update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                             disabled="#{!contasAPagarController.podeInserir()}" />
+                            <p:commandButton process="dataTableContasPagar" title="Detalhes"
+                                             icon="ui-icon-zoom-in"
+                                             actionListener="#{contasAPagarController.alterar()}"
+                                             update=":form1:outputPanelGrid,:form1:outputPanelDetalhe" />
+                            <p:commandButton process="dataTableContasPagar" title="Excluir"
+                                             icon="ui-icon-trash" actionListener="#{contasAPagarController.excluir()}"
+                                             update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                             disabled="#{!contasAPagarController.podeExcluir()}">
+                                <p:confirm header="Confirmação" message="Confirma Exclusão?"
+                                           icon="ui-icon-alert" />
+                            </p:commandButton>
+                        </f:facet>
+                        
+                        <p:column headerText="Descrição">
+			                <h:outputLabel value="#{obj.descricao}" />
+			            </p:column>
+			            
+			            <p:column headerText="Data vencimento">
+			                 <h:outputLabel value="#{obj.dataVencimeto}" >
+			                    <f:convertDateTime pattern="dd/MM/yyyy" />
+			                 </h:outputLabel>
+			            </p:column>
+			            <p:column headerText="Fornecedor">
+			                 <h:outputLabel value="#{obj.fornecedor}" />
+			            </p:column>
+			                        			            
+			            <p:column headerText="Valor">
+			                <h:outputLabel value="#{obj.valor}" >
+			                    <f:convertNumber pattern="#,###,##0.00" />
+			                </h:outputLabel>
+			            </p:column>
+			            
+			             <p:column headerText="Status">
+			                 <h:outputLabel value="#{obj.statusPagar}" />
+			            </p:column>
+                       
+                    </p:dataTable>
+                </p:panel>
+            </p:outputPanel>
+
+        </p:outputPanel>
+
+    </ui:define>
+
+    <ui:define name="telaInclusaoAlteracao">
+
+        <p:outputPanel id="outputPanelDetalhe">
+
+            <p:outputPanel rendered="#{!contasAPagarController.telaGrid}">
+                <p:panel id="panelCentroDetalhe" style="border: none" header="Contas a pagar">
+
+                    <p:outputLabel value="Nenhum registro selecionado."
+                                   rendered="#{empty contasAPagarController.objeto}" />
+                    <p:commandButton value="Voltar"
+                                     actionListener="#{contasAPagarController.voltar()}"
+                                     update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                     rendered="#{empty contasAPagarController.objeto}" />
+
+                    <p:outputPanel rendered="#{not empty contasAPagarController.objeto}">
+                        <h:panelGrid columns="1" cellpadding="5">
+                        
+                        	<p:outputLabel value="Data de vencimeto" />
+                            <p:calendar 
+                             value="#{contasAPagarController.objeto.dataVencimeto}"
+                             pattern="dd/MM/yyyy" />
+                             
+                             <p:outputLabel value="Fornecedor" />
+                            <p:inputText value="#{contasAPagarController.objeto.fornecedor}" />
+                        
+                            <p:outputLabel value="Status" />
+                            <p:selectOneMenu id="statusContasPagar" style="width: 70%;"
+                             value="#{contasAPagarController.objeto.statusPagar}" 
+                             var="objeto">
+                               <f:selectItem itemValue="" itemLabel="Selecione"/>
+				               <f:selectItems value="#{contasAPagarController.statusPagar}" itemValue="#{objeto}"/>
+				            </p:selectOneMenu> 
+                             
+                            <p:outputLabel value="Plano de contas" />                           			            
+				            <p:autoComplete id="planoContas"        					
+				                value="#{contasAPagarController.objeto.finPlanoContas}"
+				                completeMethod="#{contasAPagarController.getListaPlanoContas}" var="objeto"
+				                itemLabel="#{objeto.descricao}" itemValue="#{objeto}"
+				                converter="planoContasConverter" forceSelection="true"
+				                minQueryLength="3" maxResults="10" size="70"
+				                emptyMessage="Nenhum registro encontrado" >                    
+				            </p:autoComplete>
+				            
+				            <p:outputLabel value="Lançar na conta" />
+                            <p:selectOneMenu
+                             value="#{contasAPagarController.objeto.finContas}"                              
+                             converter="contasConverter">
+                               <f:selectItem itemValue="" itemLabel="Selecione"/>
+				               <f:selectItems value="#{contasAPagarController.listaContas}" var="objeto"
+				                              itemLabel="#{objeto.nomeBanco}" itemValue="#{objeto}"/>
+				            </p:selectOneMenu>
+                            
+                            <p:outputLabel value="Valor" />
+                            <p:inputNumber 
+                            value="#{contasAPagarController.objeto.valor}" 
+                            decimalSeparator="," thousandSeparator="."
+                            decimalPlaces="2" minValue="-100000000000">
+           					</p:inputNumber> 
+           					 
+           					<p:outputLabel value="Descrição" />
+           					<p:inputTextarea value="#{contasAPagarController.objeto.descricao}" rows="6" cols="33" />                          
+                                  <br />                                                      
+                        </h:panelGrid>
+                    </p:outputPanel>
+
+                    <p:outputPanel rendered="#{not empty contasAPagarController.objeto}"
+                                   styleClass="t2ti-campo-100">
+
+                        <p:commandButton value="Incluir"
+                                         rendered="#{empty contasAPagarController.objeto.id}"
+                                         actionListener="#{contasAPagarController.salvar()}"
+                                         update=":form1:growl,:form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                         disabled="#{!contasAPagarController.podeInserir()}" />
+                        <p:commandButton value="Alterar"
+                                         rendered="#{not empty contasAPagarController.objeto.id}"
+                                         actionListener="#{contasAPagarController.salvar()}"
+                                         update=":form1:growl,:form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                         disabled="#{!contasAPagarController.podeAlterar()}" />
+                        <p:commandButton value="Fechar"
+                                         actionListener="#{contasAPagarController.voltar()}"
+                                         update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                         process="@this" />
+
+                    </p:outputPanel>
+                </p:panel>
+            </p:outputPanel>
+
+        </p:outputPanel>
+
+    </ui:define>
+</ui:composition>

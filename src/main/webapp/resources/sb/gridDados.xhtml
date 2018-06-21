@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:composite="http://java.sun.com/jsf/composite">
+
+    <composite:interface>
+        <composite:attribute name="controller" type="com.smartbe.controller.AbstractController" required="true" />
+        <composite:attribute name="nomeFuncao" required="true" />
+        <composite:attribute name="idDataTable" required="true" />
+        <composite:attribute name="somenteConsulta" default="false" />
+        <composite:attribute name="selectionMode" default="single" />
+        <composite:attribute name="selection" default="objetoSelecionado" />
+    </composite:interface>
+
+    <composite:implementation>
+        <p:panel style="border: none" header="#{cc.attrs.nomeFuncao}"
+                 rendered="#{!cc.attrs.controller.podeConsultar()}">
+            <p:outputLabel value="Você não possui acesso a esta função" />
+        </p:panel>
+
+        <p:outputPanel id="outputPanelGrid">
+
+            <p:outputPanel rendered="#{cc.attrs.controller.telaGrid}">
+
+                <p:panel id="panelCentroGrid" style="border: none" header="#{cc.attrs.nomeFuncao}"
+                         rendered="#{cc.attrs.controller.podeConsultar()}">
+
+                    <p:dataTable id="#{cc.attrs.idDataTable}" var="obj"
+                                 value="#{cc.attrs.controller.dataModel}" paginator="true"
+                                 rows="10" rowsPerPageTemplate="5,10,15,20"
+                                 selection="#{cc.attrs.controller[cc.attrs.selection]}"
+                                 selectionMode="#{cc.attrs.selectionMode}" resizableColumns="true" lazy="true">
+
+                        <f:facet name="header">
+                            <p:commandButton title="Novo" icon="ui-icon-plus" rendered="#{!cc.attrs.somenteConsulta}"
+                                             actionListener="#{cc.attrs.controller.incluir()}"
+                                             update=":form1:telaGrid:outputPanelGrid,:form1:telaDetalhe:outputPanelDetalhe"
+                                             disabled="#{!cc.attrs.controller.podeInserir()}" />
+                            <p:commandButton process="#{cc.attrs.idDataTable}" title="Detalhes"
+                                             icon="ui-icon-zoom-in"
+                                             actionListener="#{cc.attrs.controller.alterar()}"
+                                             update=":form1:telaGrid:outputPanelGrid,:form1:telaDetalhe:outputPanelDetalhe" />
+                            <p:commandButton process="#{cc.attrs.idDataTable}" title="Excluir" rendered="#{!cc.attrs.somenteConsulta}"
+                                             icon="ui-icon-trash"
+                                             actionListener="#{cc.attrs.controller.excluir()}"
+                                             update=":form1:telaGrid:outputPanelGrid,:form1:telaDetalhe:outputPanelDetalhe"
+                                             disabled="#{!cc.attrs.controller.podeExcluir()}">
+                                <p:confirm header="Confirmação" message="Confirma Exclusão?"
+                                           icon="ui-icon-alert" />
+                            </p:commandButton>
+                        </f:facet>
+
+                        <composite:insertChildren />
+                    </p:dataTable>
+                </p:panel>
+            </p:outputPanel>
+
+        </p:outputPanel>
+    </composite:implementation>
+
+</html>

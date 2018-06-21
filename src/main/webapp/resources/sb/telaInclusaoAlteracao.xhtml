@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:composite="http://java.sun.com/jsf/composite">
+
+    <composite:interface>
+        <composite:attribute name="controller" type="com.smartbe.controller.AbstractController" required="true" />
+        <composite:attribute name="nomeFuncao" required="true" />
+        <composite:attribute name="somenteConsulta" default="false" />
+    </composite:interface>
+
+    <composite:implementation>
+        <p:outputPanel id="outputPanelDetalhe" >
+
+            <p:outputPanel  rendered="#{!cc.attrs.controller.telaGrid}">
+                <p:panel id="panelCentroDetalhe" style="border: none" header="#{cc.attrs.nomeFuncao}">
+							<p:spacer></p:spacer>
+                    <p:outputLabel value="Nenhum registro selecionado."
+                                   rendered="#{empty cc.attrs.controller.objeto}" />
+                    <p:commandButton value="Voltar"
+                                     actionListener="#{cc.attrs.controller.voltar()}"
+                                     update=":form1:telaGrid:outputPanelGrid,:form1:telaDetalhe:outputPanelDetalhe"
+                                     rendered="#{empty cc.attrs.controller.objeto}" />
+
+                    <p:outputPanel rendered="#{not empty cc.attrs.controller.objeto}">					
+		              		 
+                        <composite:insertChildren />	                     
+
+                    </p:outputPanel>
+                    <br/>
+                    <p:outputPanel rendered="#{not empty cc.attrs.controller.objeto}" styleClass="t2ti-campo-100" >
+
+                        <p:commandButton value="Incluir"
+                                         rendered="#{empty cc.attrs.controller.objeto.id and !cc.attrs.somenteConsulta}"
+                                         actionListener="#{cc.attrs.controller.salvar()}"
+                                         update=":form1:growl,:form1:telaGrid:outputPanelGrid,:form1:telaDetalhe:outputPanelDetalhe"
+                                         disabled="#{!cc.attrs.controller.podeInserir()}" />
+                        <p:commandButton value="Alterar"
+                                         rendered="#{not empty cc.attrs.controller.objeto.id and !cc.attrs.somenteConsulta}"
+                                         actionListener="#{cc.attrs.controller.salvar()}"
+                                         update=":form1:growl,:form1:telaGrid:outputPanelGrid,:form1:telaDetalhe:outputPanelDetalhe"
+                                         disabled="#{!cc.attrs.controller.podeAlterar()}" />
+                        <p:commandButton value="Fechar"
+                                         actionListener="#{cc.attrs.controller.voltar()}"
+                                         update=":form1:telaGrid:outputPanelGrid,:form1:telaDetalhe:outputPanelDetalhe"
+                                         process="@this" />
+
+                    </p:outputPanel>
+                </p:panel>
+            </p:outputPanel>
+
+        </p:outputPanel>
+    </composite:implementation>
+
+</html>

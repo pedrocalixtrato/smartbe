@@ -1,0 +1,132 @@
+<ui:composition template="/WEB-INF/template.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui">
+
+    <ui:define name="gridDados">
+        <p:panel style="border: none" header="Servico"
+                 rendered="#{!servicoController.podeConsultar()}">
+            <p:outputLabel value="Você não possui acesso a esta função" />
+        </p:panel>
+
+        <p:outputPanel id="outputPanelGrid">
+
+            <p:outputPanel rendered="#{servicoController.telaGrid}">
+
+                <p:panel id="panelCentroGrid" style="border: none" header="Servico"
+                         rendered="#{servicoController.podeConsultar()}">
+
+                    <p:dataTable id="dataTableServico" var="obj"
+                                 value="#{servicoController.dataModel}" paginator="true" rows="10"
+                                 rowsPerPageTemplate="5,10,15,20"
+                                 selection="#{servicoController.objetoSelecionado}"
+                                 selectionMode="single" resizableColumns="true" lazy="true">
+
+                        <f:facet name="header">
+                            <p:commandButton title="Novo" icon="ui-icon-plus"
+                                             actionListener="#{servicoController.incluir()}"
+                                             update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                             disabled="#{!servicoController.podeInserir()}" />
+                            <p:commandButton process="dataTableServico" title="Detalhes"
+                                             icon="ui-icon-zoom-in"
+                                             actionListener="#{servicoController.alterar()}"
+                                             update=":form1:outputPanelGrid,:form1:outputPanelDetalhe" />
+                            <p:commandButton process="dataTableServico" title="Excluir"
+                                             icon="ui-icon-trash" actionListener="#{servicoController.excluir()}"
+                                             update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                             disabled="#{!servicoController.podeExcluir()}">
+                                <p:confirm header="Confirmação" message="Confirma Exclusão?"
+                                           icon="ui-icon-alert" />
+                            </p:commandButton>
+                        </f:facet>
+
+                        <p:column headerText="Descrição">
+                            <h:outputLabel value="#{obj.descricao}" />
+                        </p:column>
+                        <p:column headerText="Valor">                           
+                            <h:outputLabel value="#{obj.valor}" >
+			                    <f:convertNumber pattern="R$ #,###,##0.00" />
+			                </h:outputLabel>
+                        </p:column>
+                        <p:column headerText="Tempo de duração">
+                            <h:outputLabel value="#{obj.tempoDuracao} minutos" />
+                        </p:column>
+                    </p:dataTable>
+                </p:panel>
+            </p:outputPanel>
+
+        </p:outputPanel>
+
+    </ui:define>
+
+    <ui:define name="telaInclusaoAlteracao">
+
+        <p:outputPanel id="outputPanelDetalhe">
+
+            <p:outputPanel rendered="#{!servicoController.telaGrid}">
+                <p:panel id="panelCentroDetalhe" style="border: none" header="Servico">
+
+                    <p:outputLabel value="Nenhum registro selecionado."
+                                   rendered="#{empty servicoController.objeto}" />
+                    <p:commandButton value="Voltar"
+                                     actionListener="#{servicoController.voltar()}"
+                                     update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                     rendered="#{empty servicoController.objeto}" />
+
+                    <p:outputPanel rendered="#{not empty servicoController.objeto}">
+                        <h:panelGrid columns="2" cellpadding="5"> 
+                        
+                            <p:outputLabel value="Descrição" />
+                            <p:inputText value="#{servicoController.objeto.descricao}" />
+                            
+                            <p:outputLabel value="Valor" />                            
+                            <p:inputNumber 
+                            value="#{servicoController.objeto.valor}" 
+                            decimalSeparator="," thousandSeparator="."
+                            decimalPlaces="2" minValue="-100000000000">
+           					</p:inputNumber>
+                            
+                            <p:outputLabel value="Valor de custo" />                            
+                            <p:inputNumber 
+                            value="#{servicoController.objeto.valor_custo}" 
+                            decimalSeparator="," thousandSeparator="."
+                            decimalPlaces="2" minValue="-100000000000">
+           					</p:inputNumber>
+                            
+                            <p:outputLabel value="Tempo de duração" />									
+                            <p:selectOneMenu value="#{servicoController.objeto.tempoDuracao}" >                            	
+                            	<f:selectItem itemValue="" itemLabel="Selecione"/>
+               					<f:selectItems value="#{servicoController.tempoDuracao}" itemValue="#{objeto}" />   								
+                            </p:selectOneMenu>
+                            
+                        </h:panelGrid>
+                    </p:outputPanel>
+
+                    <p:outputPanel rendered="#{not empty servicoController.objeto}"
+                                   styleClass="t2ti-campo-100">
+
+                        <p:commandButton value="Incluir"
+                                         rendered="#{empty servicoController.objeto.id}"
+                                         actionListener="#{servicoController.salvar()}"
+                                         update=":form1:growl,:form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                         disabled="#{!servicoController.podeInserir()}" />
+                        <p:commandButton value="Alterar"
+                                         rendered="#{not empty servicoController.objeto.id}"
+                                         actionListener="#{servicoController.salvar()}"
+                                         update=":form1:growl,:form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                         disabled="#{!servicoController.podeAlterar()}" />
+                        <p:commandButton value="Fechar"
+                                         actionListener="#{servicoController.voltar()}"
+                                         update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
+                                         process="@this" />
+
+                    </p:outputPanel>
+                </p:panel>
+            </p:outputPanel>
+
+        </p:outputPanel>
+
+    </ui:define>
+</ui:composition>
