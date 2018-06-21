@@ -46,7 +46,6 @@ public class AgendamentoDao extends DaoGenerico<Agendamento> {
 			}
 		}
 	}
-
 	public BigDecimal somarTotal(FilterData sfiltro) throws Exception {
 		try {
 			abrirConexao();
