@@ -36,13 +36,17 @@ public class Agendamento implements Serializable{
 	private Cliente cliente;
 	@Column(name = "VALOR_TOTAL")
 	private BigDecimal valorTotal = BigDecimal.ZERO;
+	@Column(name = "VALOR_PARCIAL")
+	private BigDecimal valorParcial = BigDecimal.ZERO;	
 	@Column(name="STATUS")
 	private String status;	
 	@Column(name = "DATA_INICIO")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date dataInicio;
+	//esta será a data efetiva
 	@Column(name = "DATA_FIM")
 	private Date dataFim;
+	private Integer qtdAdiantamento = 0;
 	@Column(name = "OBSERVACAO")
 	private String observacao;	
 	@OneToMany(mappedBy = "agendamento", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
@@ -91,9 +95,14 @@ public class Agendamento implements Serializable{
 	}
 	public void setObservacao(String observacao) {
 		this.observacao = observacao;
-	}
-		
+	}		
 	
+	public BigDecimal getValorParcial() {
+		return valorParcial;
+	}
+	public void setValorParcial(BigDecimal valorParcial) {
+		this.valorParcial = valorParcial;
+	}
 	public BigDecimal getValorTotal() {
 		return valorTotal;
 	}
@@ -108,6 +117,14 @@ public class Agendamento implements Serializable{
 	}	
 	
 	
+	
+	
+	public Integer getQtdAdiantamento() {
+		return qtdAdiantamento;
+	}
+	public void setQtdAdiantamento(Integer qtdAdiantamento) {
+		this.qtdAdiantamento = qtdAdiantamento;
+	}
 	@Override
 	public int hashCode() {
 		final int prime = 31;

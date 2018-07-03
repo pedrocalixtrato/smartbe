@@ -10,6 +10,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.smartbe.filter.FilterData;
 import com.smartbe.model.bean.cadastros.Agendamento;
+import com.smartbe.model.bean.financeiro.FinLancamentoCaixa;
 import com.smartbe.model.dao.DaoGenerico;
 
 public class AgendamentoDao extends DaoGenerico<Agendamento> {
@@ -30,8 +31,8 @@ public class AgendamentoDao extends DaoGenerico<Agendamento> {
 
 			if (filtro.getDataInicial() != null && filtro.getDataFinal() != null) {
 
-				criteria.add(Restrictions.ge("dataInicio", filtro.getDataInicial()))
-						.add(Restrictions.le("dataInicio", filtro.getDataFinal()));
+				criteria.add(Restrictions.ge("dataFim", filtro.getDataInicial()))
+						.add(Restrictions.le("dataFim", filtro.getDataFinal()));
 			}
 			if (filtro.getStatusServico() != null &&  !filtro.getStatusServico().trim().equals("")){
 				criteria.add(Restrictions.eq("status", filtro.getStatusServico()));
@@ -77,5 +78,6 @@ public class AgendamentoDao extends DaoGenerico<Agendamento> {
 			}
 
 		}
-	}
+	}	
+	
 }

@@ -2,6 +2,7 @@ package com.smartbe.controller.financeiro;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -25,6 +26,7 @@ public class LancamentoCaixaController extends AbstractController<FinLancamentoC
 	private DaoGenerico<FinContas> finContasDao;
 	private FinLancamentoCaixa finLancamentoCaixa;
 	List<FinContas> listaContas = new ArrayList<>();
+	private FinContas finContas;
 	
 	
 	
@@ -41,9 +43,10 @@ public class LancamentoCaixaController extends AbstractController<FinLancamentoC
 	@Override
 	@PostConstruct
 	public void init() {
-		super.init();
+		super.init();		
 		finPlanoContasDao = new DaoGenerico<>(FinPlanoContas.class);
 		finContasDao = new DaoGenerico<>(FinContas.class);
+		carregarContas();
 	}
 	@Override
 	public void incluir() {
@@ -61,6 +64,7 @@ public class LancamentoCaixaController extends AbstractController<FinLancamentoC
 	public void salvar() {						
 		super.salvar();		
 	}
+	
 	
 	
 	 public List<FinPlanoContas> getListaPlanoContas(String nome) {

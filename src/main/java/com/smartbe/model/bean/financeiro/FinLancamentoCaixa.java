@@ -4,10 +4,8 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -16,6 +14,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import com.smartbe.model.bean.cadastros.Agendamento;
+import com.smartbe.model.bean.cadastros.Cliente;
 
 @Entity
 @Table(name = "fin_lancamento_caixa")
@@ -31,8 +32,14 @@ public class FinLancamentoCaixa {
 	@Column(name = "DATA")
 	@Temporal(TemporalType.DATE)
 	private Date data;
+	@ManyToOne
+	private Cliente cliente;
 	@Column(name = "CLIENTE_FORNECEDOR")
 	private String clienteFornecedor;	
+	@Column(name = "FORMA_PAGAMENTO")
+	private String formaPagamento;
+	@ManyToOne
+	private Agendamento agendamento;	
 	@JoinColumn(name = "ID_PLANO_CONTAS")	
     @ManyToOne(optional = false)
 	private FinPlanoContas finPlanoContas;
@@ -60,6 +67,13 @@ public class FinLancamentoCaixa {
 	}
 	public void setData(Date data) {
 		this.data = data;
+	}
+	
+	public Cliente getCliente() {
+		return cliente;
+	}
+	public void setCliente(Cliente cliente) {
+		this.cliente = cliente;
 	}
 	public String getClienteFornecedor() {
 		return clienteFornecedor;
@@ -94,6 +108,19 @@ public class FinLancamentoCaixa {
 	@Override
 	public String toString() {
 		return "FinLancamentoCaixa [id=" + id + "]";
+	}
+	
+	public String getFormaPagamento() {
+		return formaPagamento;
+	}
+	public void setFormaPagamento(String formaPagamento) {
+		this.formaPagamento = formaPagamento;
+	}
+	public Agendamento getAgendamento() {
+		return agendamento;
+	}
+	public void setAgendamento(Agendamento agendamento) {
+		this.agendamento = agendamento;
 	}
 	@Override
 	public int hashCode() {

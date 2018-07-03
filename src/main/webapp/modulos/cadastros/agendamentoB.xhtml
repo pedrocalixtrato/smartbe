@@ -51,7 +51,7 @@
 							</h:outputLabel>
 						</p:column>
 
-						<p:column headerText="Cliente">
+						<p:column headerText="Cliente" >
 							<h:outputLabel value="#{obj.cliente.nome}" />
 						</p:column>
 
@@ -85,16 +85,11 @@
 							<p:tab title="Geral" >
 								<div class="card card-w-title">
 
-									<div class="t2ti-campo-30">
-										<p:outputLabel value="Data Inicio" />
-										<p:calendar pattern="dd/MM/yyyy HH:mm" mask="true"
-											value="#{agendamentoController.objeto.dataInicio}"
-											timeZone="GMT-03:00" />
-									</div>
+									
 
 									<div class="t2ti-campo-50">
-										<p:outputLabel value="Cliente" />
-										<p:autoComplete
+										<p:outputLabel value="Cliente" style="font-weight: bold" />
+										<p:autoComplete style="margin-top:20px"
 											value="#{agendamentoController.objeto.cliente}"
 											completeMethod="#{agendamentoController.getListaCliente}"
 											var="objeto" itemLabel="#{objeto.nome}" itemValue="#{objeto}"
@@ -103,34 +98,49 @@
 											emptyMessage="Nenhum registro encontrado">
 										</p:autoComplete>
 									</div>
-									
+									<div class="t2ti-campo-30"  >
+									</div>
 
-									<div class="t2ti-campo-20">
-										<div class="ui-g dashboard" style="padding-top:40%">										
+									<div class="t2ti-campo-20" >
+										<div class="ui-g dashboard" style="padding-top:10%;margin-right:170%">	
+											<ul class="activity-list" >
+						                        <li>					                       		
+						                       	  <div class="ui-g">
+						                              <div class="ui-g-6" style="width:110px;font-weight: bold">Antecipação</div>					                                
+						                          </div>
+						                            <div class="count" style="background-color:#00CED1;width:120px;">R$
+						                            <p:inputText style="font-size:23px;font-weight:bold;color:#FFFFFF;" 
+						                            	decimalSeparator="," thousandSeparator="."
+                          								decimalPlaces="2" minValue="-100000000000"						                            	
+							                            value="#{agendamentoController.objeto.valorParcial}">
+							           				</p:inputText>
+		           									</div>						                            
+						                        </li>						                        
+						                     </ul>									
 											 <ul class="activity-list">
 						                        <li>					                       		
 						                       	  <div class="ui-g">
 						                              <div class="ui-g-6" style="width:110px;font-weight: bold">Valor Total</div>					                                
 						                          </div>
-						                            <div class="count" style="background-color:#673ab7">R$#{agendamentoController.objeto.valorTotal}</div>						                            
+						                            <div class="count" style="background-color:#673ab7;width:120px;">R$#{agendamentoController.objeto.valorTotal}</div>						                            
 						                        </li>
-						                     </ul>					                       
+						                     </ul>			                       
 					                    </div>
-									</div>
+					                    </div>	
+					                  
 									
-										
-					                    
-									<BR />
-								<div class="t2ti-campo-100">
-									<p:outputLabel value="Descrição" />
-									<p:inputTextarea
+								<div >
+									<p:outputLabel value="Observação" style="font-weight: bold" />
+									<div style="width:45%;">
+									<p:inputTextarea 
 										value="#{agendamentoController.objeto.observacao}" rows="6"
 										cols="33" />
-								
+									</div>								
 								</div>
 									<p:spacer />
 								</div>
-							</p:tab>
+								
+							</p:tab>							
 							<p:tab title="Lançamento Serviço" disabled="#{agendamentoController.objeto.id == null}">
 								<div class="card card-w-title">
 									<p:dataTable id="dataTableLancamentoServico" var="obj"
@@ -253,8 +263,7 @@
                 <f:facet name="footer">
                     <p:commandButton value="Salvar"
                                      actionListener="#{agendamentoController.salvarServico}"
-                                     update=":formOutrasTelas:panelServico,:form1:growl,:form1:telaCadastroAgendamento:dataTableLancamentoServico"
-                                     	
+                                     update=":formOutrasTelas:panelServico,:form1:growl,:form1:telaCadastroAgendamento:dataTableLancamentoServico"                                     	
                                      oncomplete="if (!args.validationFailed) {PF('dialogServico').hide();}" />
                     <p:commandButton value="Cancelar"
                                      oncomplete="PF('dialogServico').hide();" />

@@ -2,8 +2,6 @@ package com.smartbe.controller.cadastros;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -26,6 +24,9 @@ import com.smartbe.model.bean.cadastros.AgendamentoServico;
 import com.smartbe.model.bean.cadastros.Cliente;
 import com.smartbe.model.bean.cadastros.Funcionario;
 import com.smartbe.model.bean.cadastros.Servico;
+import com.smartbe.model.bean.financeiro.FinContas;
+import com.smartbe.model.bean.financeiro.FinLancamentoCaixa;
+import com.smartbe.model.bean.financeiro.FinPlanoContas;
 import com.smartbe.model.dao.DaoGenerico;
 import com.smartbe.util.FacesContextUtil;
 
@@ -38,13 +39,20 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 	private DaoGenerico<Cliente> clienteDao;
 	private DaoGenerico<Servico> servicoDao;
 	private DaoGenerico<Funcionario> funcionarioDao;
+	private DaoGenerico<FinLancamentoCaixa> finLancamentoCaixaDao;
+	private DaoGenerico<FinPlanoContas> finPlanoContasDao;
+	private DaoGenerico<FinContas> finContasDao;
 	private AgendamentoDao agendamentoDao;
 	private AgendamentoServicoDao agendamentoServicoDao;
 	private BigDecimal somarTotal;
 	private Agendamento agendamento;
 	private AgendamentoServico agendamentoServico;
 	private AgendamentoServico agendamentoServicoSelecionado;
-	private BigDecimal valorTotal = BigDecimal.ZERO;	
+	private BigDecimal valorTotal = BigDecimal.ZERO;
+	private FinLancamentoCaixa finLancamentoCaixa;
+	private FinContas finContas ;
+	private FinPlanoContas finPlanoContas;
+	private boolean podeIncluirServico;
 	
 	private FilterData filtro;	
 	private List<Agendamento> agendamentos;
@@ -62,7 +70,7 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 	
 	@PostConstruct
 	@Override
-	public void init() {
+	public void init() {		
 		clienteDao = new DaoGenerico<>(Cliente.class);
 		servicoDao = new DaoGenerico<>(Servico.class);
 		funcionarioDao = new DaoGenerico<>(Funcionario.class);
@@ -70,6 +78,7 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 		agendamentoServicoDao = new AgendamentoServicoDao();
 		filtro = new FilterData();		
 		agendamentos = new ArrayList<Agendamento>();
+		finLancamentoCaixa = new FinLancamentoCaixa();
 		agendamentosServicos = new ArrayList<AgendamentoServico>();
 		
 		super.init();
@@ -87,9 +96,46 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 	@Override
 	public void salvar() {	
 		if(getObjeto().getId() == null) {
-		getObjeto().setStatus("EM ABERTO");
+		
+			getObjeto().setStatus("EM ABERTO");
+			getObjeto().setDataInicio(new Date());
+		
 		}
 		super.salvar();		
+	}
+	@Override
+	public void alterar() {
+		DaoGenerico<FinLancamentoCaixa> finLancamentoCaixaDao = new DaoGenerico<>(FinLancamentoCaixa.class);
+		
+		try {
+			finLancamentoCaixa = new FinLancamentoCaixa();
+			finLancamentoCaixa = finLancamentoCaixaDao.getBean("agendamento", getObjeto().getId());
+		} catch (Exception e) {			
+			e.printStackTrace();
+		}		
+		super.alterar();
+	}
+	public void adicionarAdiantamento() {
+		try {			
+			finContas = new FinContas();
+			finPlanoContas = new FinPlanoContas();
+			finLancamentoCaixaDao = new DaoGenerico<>(FinLancamentoCaixa.class);
+			getObjeto().setQtdAdiantamento(getObjeto().getQtdAdiantamento()+ 1);
+			finPlanoContas = getListaPlanoContas().get(0);
+			finLancamentoCaixa.setFormaPagamento("DEPOSITO");
+			finLancamentoCaixa.setClienteFornecedor(getObjeto().getCliente().getNome());
+			finLancamentoCaixa.setAgendamento(getObjeto());
+			finLancamentoCaixa.setData(new Date());
+			finLancamentoCaixa.setFinPlanoContas(finPlanoContas);
+			finLancamentoCaixa.setTipo("Credito");			
+			finLancamentoCaixaDao.merge(finLancamentoCaixa);
+			FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_INFO, "Adiantamento incluido com sucesso!", null);
+			
+		}catch (Exception e) {
+			FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_ERROR, "Nao foi possivel adicionar o agendamento!", null);
+			e.printStackTrace();
+			
+		}	
 	}
 	
 	public void alterarServico() {
@@ -105,10 +151,23 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
         }
     }
 	
+	
 	 public void incluirServico() {
-		 	agendamento = new Agendamento();
-	        agendamentoServico = new AgendamentoServico();
-	        agendamentoServico.setAgendamento(getObjeto());
+		 
+		 if (getObjeto().getCliente() == null) {
+	            podeIncluirServico = false;
+	            FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_WARN, "Antes de incluir serviços selecione o cliente.", null);	      
+	        } else {
+	        	salvar();
+	        	podeIncluirServico = true;
+	        	agendamento = new Agendamento();
+		        agendamentoServico = new AgendamentoServico();
+		        agendamentoServico.setAgendamento(getObjeto());		            
+	           
+	        }	 
+	        	        	
+	      
+		 
 	    }
 	 public void somarHorario() { 
 		 
@@ -127,10 +186,14 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 	            if (!getObjeto().getListaAgendamentoServico().contains(agendamentoServico)) {	            	
 	            	somarHorario();
 	            	filtrarAgendamentoServico();
-	            	if(agendamentosServicos == null || agendamentosServicos.isEmpty() ) {
+	            	if(getObjeto().getDataFim() == null) {
+	            		getObjeto().setDataFim(getAgendamentoServico().getDataInicio());
+	            	}
+	            	if(agendamentosServicos == null || agendamentosServicos.isEmpty() ) {	            		
 		                getObjeto().getListaAgendamentoServico().add(agendamentoServico);
 		                atualizarTotal();
 		                salvar("Servico salvo com sucesso!");
+		                
 	            	}else {
 	            	 FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_WARN, "Horarios indisponiveis, verifique a agenda!", "");
 	            	}
@@ -140,15 +203,16 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 	            e.printStackTrace();
 	            FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_ERROR, "Ocorreu um erro ao salvar o registro", e.getMessage());
 	        }
-	    } 
-	
+	    }
+	 
+	 
 	 
 	 public void filtrarAgendamentoServico() throws Exception{ 
 		 
 		 	filtro.setDataInicial(getAgendamentoServico().getDataInicio());		 	
 		 	filtro.setDataFinal(agendamentoServico.getDataFinal());
-			this.agendamentosServicos = agendamentoServicoDao.filtrar(filtro);
-			
+		 	filtro.setStatusServico(agendamentoServico.getFuncionario().getNome());
+			this.agendamentosServicos = agendamentoServicoDao.filtrar(filtro);			
 			System.out.println("este é o retorno da pesquisa" + agendamentosServicos);
 		}
 	 
@@ -173,6 +237,57 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 			e.printStackTrace();
 		}
 	}
+	public List<FinPlanoContas> getListaPlanoContas() {
+		finPlanoContasDao = new DaoGenerico<>(FinPlanoContas.class);
+        List<FinPlanoContas> listaPlanoContas = new ArrayList<>();
+        try {
+            listaPlanoContas = finPlanoContasDao.getBeansLike("descricao", "Receita");
+            
+        } catch (Exception e) {
+             e.printStackTrace();
+        }
+        return listaPlanoContas;
+    }
+	
+	public List<FinContas> getListaContas() {
+		finContasDao = new DaoGenerico<>(FinContas.class);
+        List<FinContas> listaContas = new ArrayList<>();
+        try {
+            listaContas = finContasDao.getBeansLike("nomeBanco", "EMPRESA");
+            
+        } catch (Exception e) {
+             e.printStackTrace();
+        }
+        return listaContas;
+    }
+ 
+	
+	public void finalizarPagamentoDinheiro() {				
+		try {
+			finContas = new FinContas();
+			finPlanoContas = new FinPlanoContas();
+			finLancamentoCaixa = new FinLancamentoCaixa();
+			finLancamentoCaixaDao = new DaoGenerico<>(FinLancamentoCaixa.class);
+			finPlanoContas = getListaPlanoContas().get(0);
+			finContas = getListaContas().get(0);
+			finLancamentoCaixa.setFormaPagamento("DINHEIRO");
+			finLancamentoCaixa.setValor(agendamento.getValorTotal());
+			finLancamentoCaixa.setClienteFornecedor(agendamento.getCliente().getNome());
+			finLancamentoCaixa.setAgendamento(agendamento);
+			finLancamentoCaixa.setData(new Date());
+			finLancamentoCaixa.setDescricao("Recebimento serviço");
+			finLancamentoCaixa.setFinPlanoContas(finPlanoContas);
+			finLancamentoCaixa.setFinContas(finContas);
+			finLancamentoCaixa.setTipo("Credito");			
+			finLancamentoCaixaDao.merge(finLancamentoCaixa);
+			FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_INFO, "Finalizado com sucesso!", null);			
+			
+		} catch (Exception e) {
+			FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_ERROR, "Nao foi possivel finalizar!", null);
+			e.printStackTrace();
+		}
+		
+	}
 	
 	public void finalizarServico (ActionEvent evento) {
 		
@@ -183,11 +298,18 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 			agendamento = dao.merge(agendamento);
 		} catch (Exception e) {			
 			e.printStackTrace();
-		}
-		
+		}		
 	}
 	
 	public void filtrar() throws Exception{
+		
+		GregorianCalendar gc = new GregorianCalendar();
+        gc.setTime(filtro.getDataFinal()); 
+        gc.add(Calendar.HOUR, 23 );
+        gc.add(Calendar.MINUTE, 59);	                
+        Date dataFinal = gc.getTime();       
+		
+		filtro.setDataFinal(dataFinal);
 		this.agendamentos = agendamentoDao.filtrar(filtro);
 		this.somarTotal = agendamentoDao.somarTotal(filtro);
 		
@@ -278,11 +400,27 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 	public void setAgendamentoServico(AgendamentoServico agendamentoServico) {
 		this.agendamentoServico = agendamentoServico;
 	}
-	
-	
 
-	
+	public FinLancamentoCaixa getFinLancamentoCaixa() {
+		return finLancamentoCaixa;
+	}
 
+	public void setFinLancamentoCaixa(FinLancamentoCaixa finLancamentoCaixa) {
+		this.finLancamentoCaixa = finLancamentoCaixa;
+	}
+
+	public boolean isPodeIncluirServico() {
+		return podeIncluirServico;
+	}
+
+	public void setPodeIncluirServico(boolean podeIncluirServico) {
+		this.podeIncluirServico = podeIncluirServico;
+	}
+	
+	
+	
+	
+	
 	
 	
 	

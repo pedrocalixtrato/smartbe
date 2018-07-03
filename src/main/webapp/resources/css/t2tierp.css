@@ -88,3 +88,10 @@
 .produto-nao-cadastrado {
     background-color: orange;
 }
+.relative2 {
+  position: relative;
+  top: -20px;
+  left: 20px;
+  background-color: white;
+  width: 50px;
+}
