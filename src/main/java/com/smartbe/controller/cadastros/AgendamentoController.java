@@ -15,12 +15,15 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.event.ActionEvent;
 
+import org.apache.http.client.params.ClientPNames;
+
 import com.smartbe.controller.AbstractController;
 import com.smartbe.dao.AgendamentoDao;
 import com.smartbe.dao.AgendamentoServicoDao;
 import com.smartbe.filter.FilterData;
 import com.smartbe.model.bean.cadastros.Agendamento;
 import com.smartbe.model.bean.cadastros.AgendamentoServico;
+import com.smartbe.model.bean.cadastros.AgendamentoValores;
 import com.smartbe.model.bean.cadastros.Cliente;
 import com.smartbe.model.bean.cadastros.Funcionario;
 import com.smartbe.model.bean.cadastros.Servico;
@@ -47,16 +50,19 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 	private BigDecimal somarTotal;
 	private Agendamento agendamento;
 	private AgendamentoServico agendamentoServico;
-	private AgendamentoServico agendamentoServicoSelecionado;
-	private BigDecimal valorTotal = BigDecimal.ZERO;
+	private AgendamentoServico agendamentoServicoSelecionado;	
+	private BigDecimal valorTotal1 = BigDecimal.ZERO;
 	private FinLancamentoCaixa finLancamentoCaixa;
 	private FinContas finContas ;
 	private FinPlanoContas finPlanoContas;
-	private boolean podeIncluirServico;
-	
+	private boolean podeIncluirServico;	
+	private String nomeCliente;	
+	private boolean clienteSalvo = false;
+	private Cliente cliente;	
 	private FilterData filtro;	
 	private List<Agendamento> agendamentos;
 	private List <AgendamentoServico> agendamentosServicos;
+	private AgendamentoValores agendamentoValores;
 	
 	@Override
 	public Class<Agendamento> getClazz() {
@@ -72,12 +78,13 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 	@Override
 	public void init() {		
 		clienteDao = new DaoGenerico<>(Cliente.class);
+		cliente = new Cliente();		
 		servicoDao = new DaoGenerico<>(Servico.class);
 		funcionarioDao = new DaoGenerico<>(Funcionario.class);
 		agendamentoDao = new AgendamentoDao();	
 		agendamentoServicoDao = new AgendamentoServicoDao();
 		filtro = new FilterData();		
-		agendamentos = new ArrayList<Agendamento>();
+		agendamentos = new ArrayList<Agendamento>();		
 		finLancamentoCaixa = new FinLancamentoCaixa();
 		agendamentosServicos = new ArrayList<AgendamentoServico>();
 		
@@ -88,53 +95,137 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 	public void incluir() {
 		super.incluir();
 		agendamentoServico = new AgendamentoServico();
-		getObjeto().setListaAgendamentoServico(new HashSet<AgendamentoServico>());		
-	
+		getObjeto().setListaAgendamentoServico(new HashSet<AgendamentoServico>());
 				
 	}
 	
 	@Override
-	public void salvar() {	
-		if(getObjeto().getId() == null) {
-		
+	public void salvar() {
+		boolean jaSalvo = false ;
+		if (getObjeto().getDataInicio() == null) {
 			getObjeto().setStatus("EM ABERTO");
 			getObjeto().setDataInicio(new Date());
+		}
+		if(finLancamentoCaixa.getValor().compareTo(BigDecimal.ZERO) != 0 ) {
+			adicionarAdiantamento();
+			try {
+				finLancamentoCaixa = finLancamentoCaixaDao.getBean("idAdiantamento", getObjeto().getId());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}			
 		
 		}
-		super.salvar();		
-	}
+		if (getObjeto().getCliente() == null && nomeCliente != null && clienteSalvo == false) {
+			try {
+				cliente.setNome(nomeCliente);
+				getObjeto().setCliente(cliente);
+				clienteSalvo = true;
+				super.salvar();
+				jaSalvo = true;
+				cliente = clienteDao.getBean("id", getObjeto().getCliente().getId());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		if (clienteSalvo == true && getObjeto().getCliente() == null) {
+			try {				
+				getObjeto().setCliente(cliente);
+				super.salvar();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}else {
+			if(jaSalvo == false ) {
+			super.salvar();
+			}
+		}
+		
+		
+	}	
+	
 	@Override
 	public void alterar() {
-		DaoGenerico<FinLancamentoCaixa> finLancamentoCaixaDao = new DaoGenerico<>(FinLancamentoCaixa.class);
-		
+
+		DaoGenerico<FinLancamentoCaixa> finLancamentoCaixaDao = new DaoGenerico<>(FinLancamentoCaixa.class);		
 		try {
 			finLancamentoCaixa = new FinLancamentoCaixa();
-			finLancamentoCaixa = finLancamentoCaixaDao.getBean("agendamento", getObjeto().getId());
+			if(getObjetoSelecionado().getAgendamentoValores().getQtdAdiantamento() != 0) {
+			finLancamentoCaixa = finLancamentoCaixaDao.getBean("idAdiantamento",getObjetoSelecionado().getId());			
+			}
+			
+					
 		} catch (Exception e) {			
 			e.printStackTrace();
 		}		
 		super.alterar();
 	}
+	@Override
+	public void excluir() {	
+			finLancamentoCaixa = new FinLancamentoCaixa();
+			finLancamentoCaixaDao = new DaoGenerico<>(FinLancamentoCaixa.class);
+			try {				
+				if(getObjetoSelecionado().getAgendamentoValores().getQtdAdiantamento() != 0) {				   
+				    finLancamentoCaixa = finLancamentoCaixaDao.getBean("idAdiantamento",getObjetoSelecionado().getId());				    
+				    finLancamentoCaixaDao.excluir(finLancamentoCaixa);
+				    
+				    super.excluir();
+				    
+				    }else {
+			    	super.excluir();
+			    }
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+		    	FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_ERROR, "Não foi possivel excluir este registro!", null);
+		    	FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_ERROR, "Existe lancamentos financeiros!", null);
+
+			}		
+				
+	}
 	public void adicionarAdiantamento() {
-		try {			
+		try {
+			if(finLancamentoCaixa.getId() == null) {
 			finContas = new FinContas();
 			finPlanoContas = new FinPlanoContas();
 			finLancamentoCaixaDao = new DaoGenerico<>(FinLancamentoCaixa.class);
-			getObjeto().setQtdAdiantamento(getObjeto().getQtdAdiantamento()+ 1);
+			getObjeto().getAgendamentoValores().setQtdAdiantamento(getObjeto().getAgendamentoValores().getQtdAdiantamento()+ 1);
 			finPlanoContas = getListaPlanoContas().get(0);
 			finLancamentoCaixa.setFormaPagamento("DEPOSITO");
+			if(getObjeto().getCliente()!= null) {
 			finLancamentoCaixa.setClienteFornecedor(getObjeto().getCliente().getNome());
+			}else {
+			finLancamentoCaixa.setClienteFornecedor(nomeCliente);
+			}
 			finLancamentoCaixa.setAgendamento(getObjeto());
+			finLancamentoCaixa.setIdAdiantamento(getObjeto().getId());
 			finLancamentoCaixa.setData(new Date());
 			finLancamentoCaixa.setFinPlanoContas(finPlanoContas);
-			finLancamentoCaixa.setTipo("Credito");			
+			finLancamentoCaixa.setTipo("Credito");
 			finLancamentoCaixaDao.merge(finLancamentoCaixa);
-			FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_INFO, "Adiantamento incluido com sucesso!", null);
+			BigDecimal valorTotal = getObjeto().getAgendamentoValores().getValorParcial().subtract(finLancamentoCaixa.getValor());
+			getObjeto().getAgendamentoValores().setValorTotal(valorTotal);
+			salvar("Adiantamento incluido com sucesso!");
+			}else {
+				finLancamentoCaixaDao = new DaoGenerico<>(FinLancamentoCaixa.class);
+				finPlanoContas = new FinPlanoContas();
+				getObjeto().getAgendamentoValores().setQtdAdiantamento(getObjeto().getAgendamentoValores().getQtdAdiantamento()+ 1);
+				finPlanoContas = getListaPlanoContas().get(0);
+				if(getObjeto().getCliente()!= null) {
+					finLancamentoCaixa.setClienteFornecedor(getObjeto().getCliente().getNome());
+					}else {
+					finLancamentoCaixa.setClienteFornecedor(nomeCliente);
+					}
+				finLancamentoCaixa.setData(new Date());
+				finLancamentoCaixa.setFinPlanoContas(finPlanoContas);
+				BigDecimal valorTotal = getObjeto().getAgendamentoValores().getValorParcial().subtract(finLancamentoCaixa.getValor());
+				getObjeto().getAgendamentoValores().setValorTotal(valorTotal);
+				finLancamentoCaixaDao.merge(finLancamentoCaixa);
+				salvar("Adiantamento alterado com sucesso!");
+			}
 			
 		}catch (Exception e) {
 			FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_ERROR, "Nao foi possivel adicionar o agendamento!", null);
-			e.printStackTrace();
-			
+			e.printStackTrace();			
 		}	
 	}
 	
@@ -147,6 +238,8 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
             FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_INFO, "Nenhum registro selecionado!", null);
         } else {
             getObjeto().getListaAgendamentoServico().remove(agendamentoServicoSelecionado);
+            subtrairTotal();
+            salvar();
             FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_INFO, "Registro excluído!", null);
         }
     }
@@ -154,21 +247,17 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 	
 	 public void incluirServico() {
 		 
-		 if (getObjeto().getCliente() == null) {
+		 if (getObjeto().getCliente() == null && nomeCliente == null) {
 	            podeIncluirServico = false;
 	            FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_WARN, "Antes de incluir serviços selecione o cliente.", null);	      
-	        } else {
-	        	salvar();
-	        	podeIncluirServico = true;
-	        	agendamento = new Agendamento();
-		        agendamentoServico = new AgendamentoServico();
-		        agendamentoServico.setAgendamento(getObjeto());		            
+	        }else { 
 	           
-	        }	 
-	        	        	
-	      
-		 
+	        	podeIncluirServico = true;
+		        agendamentoServico = new AgendamentoServico();		       
+		        agendamentoServico.setAgendamento(getObjeto());		        
+		        }
 	    }
+	 
 	 public void somarHorario() { 
 		 
      	GregorianCalendar gc = new GregorianCalendar();
@@ -181,6 +270,7 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 		 
 	 }
 	 
+	 
 	 public void salvarServico() {
 	        try {	            
 	            if (!getObjeto().getListaAgendamentoServico().contains(agendamentoServico)) {	            	
@@ -191,8 +281,8 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 	            	}
 	            	if(agendamentosServicos == null || agendamentosServicos.isEmpty() ) {	            		
 		                getObjeto().getListaAgendamentoServico().add(agendamentoServico);
-		                atualizarTotal();
-		                salvar("Servico salvo com sucesso!");
+		                calculaTotal();
+		                salvar();
 		                
 	            	}else {
 	            	 FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_WARN, "Horarios indisponiveis, verifique a agenda!", "");
@@ -215,17 +305,41 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 			this.agendamentosServicos = agendamentoServicoDao.filtrar(filtro);			
 			System.out.println("este é o retorno da pesquisa" + agendamentosServicos);
 		}
+	 public void subtrairTotal() {
+		BigDecimal novoValor = agendamentoValores.getValorParcial().subtract(agendamentoServicoSelecionado.getValor());
+		agendamentoValores.setValorParcial(novoValor);
+		calculaTotal();
+		 
+	 }
 	 
-	public void atualizarTotal() {
+	public void calculaTotal() {
+		BigDecimal desconto = BigDecimal.ZERO;
+		BigDecimal valorTotal = BigDecimal.ZERO;
 		BigDecimal valorSelecionado = BigDecimal.ZERO;
-		BigDecimal valorAtual = BigDecimal.ZERO;
-		valorSelecionado = agendamentoServico.getValor();
-		valorAtual = getObjeto().getValorTotal();
-		valorTotal = valorSelecionado.add(valorAtual); 
-		getObjeto().setValorTotal(valorTotal);
-	
+		BigDecimal valorParcial = BigDecimal.ZERO;
 		
-	}
+		if(agendamentoServico != null) {
+		valorSelecionado = agendamentoServico.getValor();
+		}
+		
+		if(getObjeto().getAgendamentoValores() != null) {
+		valorParcial = 	getObjeto().getAgendamentoValores().getValorParcial().add(valorSelecionado);	
+		}else {
+			valorParcial = 	valorSelecionado.add(valorParcial);
+		}
+		desconto = finLancamentoCaixa.getValor();		
+		valorTotal = valorParcial.subtract(desconto);		
+		if(getObjeto().getAgendamentoValores() == null) {
+			AgendamentoValores agendamentoValores = new AgendamentoValores();
+			getObjeto().setAgendamentoValores(agendamentoValores);
+			getObjeto().getAgendamentoValores().setValorParcial(valorParcial);
+			getObjeto().getAgendamentoValores().setValorTotal(valorTotal);
+		}else {
+			getObjeto().getAgendamentoValores().setValorParcial(valorParcial);
+			getObjeto().getAgendamentoValores().setValorTotal(valorTotal);
+		}
+		
+	}	
 	
 	public void iniciarServico(ActionEvent evento) {		
 		try {
@@ -271,7 +385,7 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 			finPlanoContas = getListaPlanoContas().get(0);
 			finContas = getListaContas().get(0);
 			finLancamentoCaixa.setFormaPagamento("DINHEIRO");
-			finLancamentoCaixa.setValor(agendamento.getValorTotal());
+			finLancamentoCaixa.setValor(agendamentoValores.getValorTotal());
 			finLancamentoCaixa.setClienteFornecedor(agendamento.getCliente().getNome());
 			finLancamentoCaixa.setAgendamento(agendamento);
 			finLancamentoCaixa.setData(new Date());
@@ -320,10 +434,13 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
         List<Cliente> listaCliente = new ArrayList<>();
         try {
             listaCliente = clienteDao.getBeansLike("nome", nome);
-            
+            if(listaCliente.isEmpty()) {
+            	nomeCliente = nome;
+            }
         } catch (Exception e) {
              e.printStackTrace();
-        }
+        } 
+        	
         return listaCliente;
     }
 	
@@ -416,12 +533,33 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 	public void setPodeIncluirServico(boolean podeIncluirServico) {
 		this.podeIncluirServico = podeIncluirServico;
 	}
-	
-	
-	
-	
-	
-	
+
+	public BigDecimal getValorTotal1() {
+		return valorTotal1;
+	}
+
+	public void setValorTotal1(BigDecimal valorTotal1) {
+		this.valorTotal1 = valorTotal1;
+	}
+
+	public AgendamentoValores getAgendamentoValores() {
+		if(agendamentoValores == null ) {
+		agendamentoValores = new AgendamentoValores();
+	}
+		return agendamentoValores;
+	}
+
+	public void setAgendamentoValores(AgendamentoValores agendamentoValores) {
+		this.agendamentoValores = agendamentoValores;
+	}
+
+	public Cliente getCliente() {
+		return cliente;
+	}
+
+	public void setCliente(Cliente cliente) {
+		this.cliente = cliente;
+	}
 	
 	
 	

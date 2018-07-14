@@ -448,6 +448,17 @@ public abstract class AbstractController<T> implements Serializable {
 	public void salvar() {
 		salvar(null);
 	}
+	
+	public void salvarSemMsg() {
+		try {
+			objeto = dao.merge(objeto);			
+		} catch (Exception e) {
+			e.printStackTrace();
+			FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_ERROR, "Ocorreu um erro ao salvar o registro!",
+					e.getMessage());
+		}
+	}
+	
 
 	public void salvar(String mensagem) {
 		try {

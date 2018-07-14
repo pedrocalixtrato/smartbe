@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -40,7 +41,7 @@ public class AgendamentoServico implements Serializable {
 		@Column(name = "VALOR")
 	    private BigDecimal valor;
 	    @JoinColumn(name = "ID_AGENDAMENTO", referencedColumnName = "ID")
-	    @ManyToOne(optional = false)
+	    @ManyToOne(optional = false, cascade = CascadeType.MERGE)
 	    private Agendamento agendamento;
 	    
 		public Integer getId() {

@@ -13,6 +13,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
@@ -32,12 +33,12 @@ public class Agendamento implements Serializable{
 	@Basic(optional = false)
 	@Column(name = "ID")
 	private Integer id;	
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+	@JoinColumn(name = "ID_CLIENTE", referencedColumnName = "ID")
 	private Cliente cliente;
-	@Column(name = "VALOR_TOTAL")
-	private BigDecimal valorTotal = BigDecimal.ZERO;
-	@Column(name = "VALOR_PARCIAL")
-	private BigDecimal valorParcial = BigDecimal.ZERO;	
+	@ManyToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "ID_AGENDAMENTO_VALORES", referencedColumnName = "ID")
+	private AgendamentoValores agendamentoValores;
 	@Column(name="STATUS")
 	private String status;	
 	@Column(name = "DATA_INICIO")
@@ -46,7 +47,7 @@ public class Agendamento implements Serializable{
 	//esta será a data efetiva
 	@Column(name = "DATA_FIM")
 	private Date dataFim;
-	private Integer qtdAdiantamento = 0;
+	private Integer qtdAdiantamento = 0;	
 	@Column(name = "OBSERVACAO")
 	private String observacao;	
 	@OneToMany(mappedBy = "agendamento", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
@@ -97,18 +98,7 @@ public class Agendamento implements Serializable{
 		this.observacao = observacao;
 	}		
 	
-	public BigDecimal getValorParcial() {
-		return valorParcial;
-	}
-	public void setValorParcial(BigDecimal valorParcial) {
-		this.valorParcial = valorParcial;
-	}
-	public BigDecimal getValorTotal() {
-		return valorTotal;
-	}
-	public void setValorTotal(BigDecimal valorTotal) {
-		this.valorTotal = valorTotal;
-	}
+	
 	public Set<AgendamentoServico> getListaAgendamentoServico() {
 		return listaAgendamentoServico;
 	}
@@ -124,6 +114,13 @@ public class Agendamento implements Serializable{
 	}
 	public void setQtdAdiantamento(Integer qtdAdiantamento) {
 		this.qtdAdiantamento = qtdAdiantamento;
+	}	
+	
+	public AgendamentoValores getAgendamentoValores() {
+		return agendamentoValores;
+	}
+	public void setAgendamentoValores(AgendamentoValores agendamentoValores) {
+		this.agendamentoValores = agendamentoValores;
 	}
 	@Override
 	public int hashCode() {

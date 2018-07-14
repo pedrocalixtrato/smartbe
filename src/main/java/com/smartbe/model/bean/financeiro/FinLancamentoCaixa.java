@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -15,6 +16,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.fasterxml.jackson.databind.AnnotationIntrospector.ReferenceProperty.Type;
 import com.smartbe.model.bean.cadastros.Agendamento;
 import com.smartbe.model.bean.cadastros.Cliente;
 
@@ -27,6 +29,7 @@ public class FinLancamentoCaixa {
     @Basic(optional = false)
     @Column(name = "ID")
 	private Integer id;
+	private Integer idAdiantamento;
 	@Column(name = "TIPO")
 	private String tipo;
 	@Column(name = "DATA")
@@ -46,7 +49,7 @@ public class FinLancamentoCaixa {
 	@ManyToOne	
 	private FinContas finContas;
 	@Column(name = "VALOR")
-    private BigDecimal valor;
+    private BigDecimal valor = BigDecimal.ZERO;
 	@Column(name = "DESCRICAO")
 	private String descricao;
 	
@@ -121,6 +124,14 @@ public class FinLancamentoCaixa {
 	}
 	public void setAgendamento(Agendamento agendamento) {
 		this.agendamento = agendamento;
+	}
+	
+	
+	public Integer getIdAdiantamento() {
+		return idAdiantamento;
+	}
+	public void setIdAdiantamento(Integer idAdiantamento) {
+		this.idAdiantamento = idAdiantamento;
 	}
 	@Override
 	public int hashCode() {
