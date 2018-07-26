@@ -55,12 +55,12 @@ public class AgendamentoDao extends DaoGenerico<Agendamento> {
 
 			if (sfiltro.getDataInicial() == null && sfiltro.getDataFinal() == null) {
 
-				criteria.setProjection(Projections.sum("valorTotal"));
+				criteria.setProjection(Projections.sum("agendamentoValores.valorTotal"));
 				return (BigDecimal) criteria.uniqueResult();
 
 			}
 
-			criteria.setProjection(Projections.sum("valorTotal"))
+			criteria.setProjection(Projections.sum("agendamentoValores.valorTotal"))
 					.add(Restrictions.ge("dataInicio", sfiltro.getDataInicial()))
 					.add(Restrictions.le("dataInicio", sfiltro.getDataFinal()));
 			if (sfiltro.getStatusServico() != null) {

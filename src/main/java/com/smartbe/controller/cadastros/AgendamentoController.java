@@ -89,12 +89,13 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 		agendamentosServicos = new ArrayList<AgendamentoServico>();
 		
 		super.init();
-	}
+	}	
 	
 	@Override
 	public void incluir() {
 		super.incluir();
 		agendamentoServico = new AgendamentoServico();
+		finLancamentoCaixa = new FinLancamentoCaixa();
 		getObjeto().setListaAgendamentoServico(new HashSet<AgendamentoServico>());
 				
 	}
