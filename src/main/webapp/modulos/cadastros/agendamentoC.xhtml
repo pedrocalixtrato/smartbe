@@ -54,7 +54,7 @@
 							</h:outputLabel>
 						</p:column>
 
-						<p:column headerText="Cliente" >
+						<p:column headerText="Cliente">
 							<h:outputLabel value="#{obj.cliente.nome}" />
 						</p:column>
 
@@ -168,7 +168,13 @@
 				                            	<h:outputLabel  value="Código #{agendamentoController.finLancamentoCaixa.id}" />
 				                            </h:panelGroup>				                            
 				                        </div>
-				                        <div class="ui-g-12" style="margin-top:5%" >				                        
+				                        <div class="ui-g-12" style="margin-top:5%" >
+				                            <h:panelGroup styleClass="md-inputfield">
+				                                <p:calendar pattern="dd/MM/yyyy" value="#{agendamentoController.finLancamentoCaixa.data}"/>
+				                                <label>Data</label>
+				                            </h:panelGroup>			                            
+				                        </div>
+				                        <div class="ui-g-12" >				                        
 				                            <p:selectOneMenu
 				                             value="#{agendamentoController.finLancamentoCaixa.finContas}"                              
 				                             converter="contasConverter">

@@ -39,7 +39,13 @@
 			<version>6.0.0</version>
 			<scope>compile</scope>
 		</dependency>
-        
+		
+		<dependency>
+		   <groupId>com.xpert</groupId>
+		   <artifactId>xpert-framework</artifactId>
+		   <version>1.8.3</version>
+		</dependency>
+		        
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-entitymanager</artifactId>
@@ -168,6 +174,12 @@
             <url>http://repository.primefaces.org</url>
             <layout>default</layout>
         </repository>
+        
+        <repository>
+			<id>xpert-framework</id>
+			<name>xpert-framework</name>
+			<url>http://xpert-framework.github.io/maven/</url>
+		</repository>
         
     </repositories>
 </project>

@@ -31,6 +31,8 @@ package com.smartbe.model.dao;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -50,7 +52,14 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
 
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.primefaces.model.SortOrder;
+
+import com.smartbe.filter.FilterData;
+import com.smartbe.model.bean.cadastros.Agendamento;
 
 public class DaoGenerico<T> implements Serializable {
 
@@ -267,6 +276,36 @@ public class DaoGenerico<T> implements Serializable {
             }
         }
     }
+    
+    public List<T> getBeans(int first, int pageSize, String sortField, SortOrder sortOrder, Map<String, Object> filters, String andOr) throws Exception {
+    	
+   	 try {
+            abrirConexao();
+            String jpql = "SELECT o FROM " + clazz.getName() + " o WHERE 1 = 1 ";
+
+            jpql += addCondicao(filters, andOr);
+
+            if (sortField != null && sortOrder != null){
+                if (sortOrder.equals(SortOrder.ASCENDING)) {
+                    jpql += " ORDER BY o." + sortField + " ASC";
+                } else if (sortOrder.equals(SortOrder.DESCENDING)) {
+                    jpql += " ORDER BY o." + sortField + " DESC";
+                }
+            }Query query = em.createQuery(jpql);
+
+            defineParametros(filters, query);
+
+            query.setFirstResult(first);
+            query.setMaxResults(pageSize);
+            return query.getResultList();
+   	 } catch (Exception e) {
+            throw e;
+        } finally {
+            if (isAutoCommit()) {
+                fecharConexao();
+            }
+        }
+    }
 
     public List<T> listaBeans(String atributo, Object valor) throws Exception {
         try {
@@ -312,46 +351,7 @@ public class DaoGenerico<T> implements Serializable {
         return getBeansLike(atributo, valor, null);
     }
     
-    public Long getTotalRegistros(Map<String, Object> filters) throws Exception {
-        try {
-            abrirConexao();
-            String jpql = "SELECT COUNT(o.id) FROM " + clazz.getName() + " o WHERE 1 = 1";
-
-            for (Iterator<String> it = filters.keySet().iterator(); it.hasNext();) {
-                String atributo = it.next();
-                Object valor = filters.get(atributo);
-                if (valor != null) {
-                    if (valor.getClass() == String.class) {
-                        jpql += " AND LOWER(o." + atributo + ") like :" + atributo;
-                    } else {
-                        jpql += " AND o." + atributo + " = :" + atributo;
-                    }
-                }
-            }
-
-            Query query = em.createQuery(jpql);
-
-            for (Iterator<String> it = filters.keySet().iterator(); it.hasNext();) {
-                String atributo = it.next();
-                Object valor = filters.get(atributo);
-                if (valor != null) {
-                    if (valor.getClass() == String.class) {
-                        query.setParameter(atributo, "%" + String.valueOf(valor).toLowerCase() + "%");
-                    } else {
-                        query.setParameter(atributo, valor);
-                    }
-                }
-            }
-            return (Long) query.getSingleResult();
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            if (isAutoCommit()) {
-                fecharConexao();
-            }
-        }
-    }
-
+   
     public List<T> getBeans(int first, int pageSize, String sortField, SortOrder sortOrder, Map<String, Object> filters) throws Exception {
         try {
             abrirConexao();
@@ -361,9 +361,11 @@ public class DaoGenerico<T> implements Serializable {
                 String atributo = it.next();
                 Object valor = filters.get(atributo);
                 if (valor != null) {
+                	
                     if (valor.getClass() == String.class) {
                         jpql += " AND LOWER(o." + atributo + ") like :" + atributo;
-                    } else {
+                    } 	else {
+                    
                         jpql += " AND o." + atributo + " = :" + atributo;
                     }
                 }
@@ -402,7 +404,94 @@ public class DaoGenerico<T> implements Serializable {
             }
         }
     }
+    protected void defineParametros(Map<String, Object> filters, Query query) throws Exception {
+        for (Iterator<String> it = filters.keySet().iterator(); it.hasNext();) {
+            String atributo = it.next();
+            Object valor = filters.get(atributo);
+            if (valor != null) {
+                if (valor.getClass() == String.class) {
+                    query.setParameter(atributo.replaceAll("\\.", ""), "%" + String.valueOf(valor).toLowerCase() + "%");
+                } else {
+                    query.setParameter(atributo.replaceAll("\\.", ""), valor);
+                }
+            }
+        }
+    }
     
+    protected String addCondicao(Map<String, Object> filters, String andOr) throws Exception {
+        String jpql = "";
+        if (!filters.isEmpty()) {
+            jpql = " AND (";
+            boolean primeiraCondicao = true;
+            for (Iterator<String> it = filters.keySet().iterator(); it.hasNext();) {
+                String atributo = it.next();
+                Object valor = filters.get(atributo);
+                if (valor != null) {
+                    if (valor.getClass() == String.class) {
+                        if (primeiraCondicao) {
+                            jpql += " LOWER(o." + atributo + ") like :" + atributo.replaceAll("\\.", "");
+                            primeiraCondicao = false;
+                        } else {
+                            jpql += " " + andOr + " LOWER(o." + atributo + ") like :" + atributo.replaceAll("\\.", "");
+                        }
+                    } else {
+                        if (primeiraCondicao) {
+                            jpql += " o." + atributo + " = :" + atributo.replaceAll("\\.", "");
+                            primeiraCondicao = false;
+                        } else {
+                            jpql += " " + andOr + " o." + atributo + " = :" + atributo.replaceAll("\\.", "");
+                        }
+                    }
+                }
+            }
+            jpql += ")";
+        }
+
+        return jpql;
+    }
+    
+    public Long getTotalRegistros(Map<String, Object> filters) throws Exception {
+    	return getTotalRegistros(filters, "AND");
+    }
+    
+    public Long getTotalRegistros(Map<String, Object> filters, String andOr) throws Exception {
+        try {
+            abrirConexao();
+            String jpql = "SELECT COUNT(o.id) FROM " + clazz.getName() + " o WHERE 1 = 1 ";
+
+            jpql += addCondicao(filters, andOr);
+
+            Query query = em.createQuery(jpql);
+
+            defineParametros(filters, query);
+
+            return (Long) query.getSingleResult();
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            if (isAutoCommit()) {
+                fecharConexao();
+            }
+            }
+    }
+   
+    @SuppressWarnings("unchecked")
+	public List<T> listar(T entidade) throws Exception {
+		try {
+			abrirConexao();
+
+			Session session = em.unwrap(Session.class);
+			Criteria criteria = session.createCriteria(clazz);
+
+			return criteria.setCacheable(true).list();
+		} catch (Exception e) {
+			throw e;
+		} finally {
+			if (isAutoCommit()) {
+				fecharConexao();
+			}
+		}
+	}
     
 
     public boolean isAutoCommit() {

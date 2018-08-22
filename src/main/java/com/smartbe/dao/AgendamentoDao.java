@@ -1,16 +1,22 @@
 package com.smartbe.dao;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+
+import javax.persistence.Query;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.primefaces.model.SortOrder;
 
 import com.smartbe.filter.FilterData;
 import com.smartbe.model.bean.cadastros.Agendamento;
-import com.smartbe.model.bean.financeiro.FinLancamentoCaixa;
 import com.smartbe.model.dao.DaoGenerico;
 
 public class AgendamentoDao extends DaoGenerico<Agendamento> {
@@ -54,16 +60,16 @@ public class AgendamentoDao extends DaoGenerico<Agendamento> {
 			Criteria criteria = session.createCriteria(Agendamento.class);
 
 			if (sfiltro.getDataInicial() == null && sfiltro.getDataFinal() == null) {
-
-				criteria.setProjection(Projections.sum("agendamentoValores.valorTotal"));
+				criteria.createAlias("agendamentoValores", "a").
+				setProjection(Projections.sum("a.valorTotal"));
 				return (BigDecimal) criteria.uniqueResult();
 
 			}
-
-			criteria.setProjection(Projections.sum("agendamentoValores.valorTotal"))
+			criteria.createAlias("agendamentoValores", "a").
+			setProjection(Projections.sum("a.valorTotal"))
 					.add(Restrictions.ge("dataInicio", sfiltro.getDataInicial()))
 					.add(Restrictions.le("dataInicio", sfiltro.getDataFinal()));
-			if (sfiltro.getStatusServico() != null) {
+			if (sfiltro.getStatusServico() != null && sfiltro.getStatusServico() != sfiltro.getStatusServico().trim()) {
 				criteria.add(Restrictions.eq("status", sfiltro.getStatusServico()));
 			}
 
@@ -78,6 +84,6 @@ public class AgendamentoDao extends DaoGenerico<Agendamento> {
 			}
 
 		}
-	}	
+	}
 	
 }

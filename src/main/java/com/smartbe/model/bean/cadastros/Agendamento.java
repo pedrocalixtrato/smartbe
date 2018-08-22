@@ -46,6 +46,7 @@ public class Agendamento implements Serializable{
 	private Date dataInicio;
 	//esta será a data efetiva
 	@Column(name = "DATA_FIM")
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date dataFim;
 	private Integer qtdAdiantamento = 0;	
 	@Column(name = "OBSERVACAO")

@@ -8,14 +8,16 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.event.ActionEvent;
+import javax.servlet.http.HttpServletRequest;
 
-import org.apache.http.client.params.ClientPNames;
+import org.primefaces.model.SortOrder;
 
 import com.smartbe.controller.AbstractController;
 import com.smartbe.dao.AgendamentoDao;
@@ -32,6 +34,8 @@ import com.smartbe.model.bean.financeiro.FinLancamentoCaixa;
 import com.smartbe.model.bean.financeiro.FinPlanoContas;
 import com.smartbe.model.dao.DaoGenerico;
 import com.smartbe.util.FacesContextUtil;
+
+
 
 @ManagedBean
 @ViewScoped
@@ -81,21 +85,27 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 		cliente = new Cliente();		
 		servicoDao = new DaoGenerico<>(Servico.class);
 		funcionarioDao = new DaoGenerico<>(Funcionario.class);
-		agendamentoDao = new AgendamentoDao();	
+		agendamentoDao = new AgendamentoDao();			
 		agendamentoServicoDao = new AgendamentoServicoDao();
 		filtro = new FilterData();		
 		agendamentos = new ArrayList<Agendamento>();		
 		finLancamentoCaixa = new FinLancamentoCaixa();
-		agendamentosServicos = new ArrayList<AgendamentoServico>();
-		
+		agendamentosServicos = new ArrayList<AgendamentoServico>();		
 		super.init();
+		dataModel = new AgendamentoDataModel();
+	    dataModel.setClazz(getClazz());
+	    dataModel.setDao(dao);
+		
+		
 	}	
 	
 	@Override
 	public void incluir() {
 		super.incluir();
+		cliente = new Cliente();
 		agendamentoServico = new AgendamentoServico();
 		finLancamentoCaixa = new FinLancamentoCaixa();
+		finLancamentoCaixa.setData(new Date());
 		getObjeto().setListaAgendamentoServico(new HashSet<AgendamentoServico>());
 				
 	}
@@ -198,9 +208,11 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 			finLancamentoCaixa.setClienteFornecedor(nomeCliente);
 			}
 			finLancamentoCaixa.setAgendamento(getObjeto());
-			finLancamentoCaixa.setIdAdiantamento(getObjeto().getId());
-			finLancamentoCaixa.setData(new Date());
+			finLancamentoCaixa.setIdAdiantamento(getObjeto().getId());			
 			finLancamentoCaixa.setFinPlanoContas(finPlanoContas);
+			if(finLancamentoCaixa.getDescricao() == null){
+				finLancamentoCaixa.setDescricao("Adiantamento");
+			}
 			finLancamentoCaixa.setTipo("Credito");
 			finLancamentoCaixaDao.merge(finLancamentoCaixa);
 			BigDecimal valorTotal = getObjeto().getAgendamentoValores().getValorParcial().subtract(finLancamentoCaixa.getValor());
@@ -215,8 +227,7 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 					finLancamentoCaixa.setClienteFornecedor(getObjeto().getCliente().getNome());
 					}else {
 					finLancamentoCaixa.setClienteFornecedor(nomeCliente);
-					}
-				finLancamentoCaixa.setData(new Date());
+					}				
 				finLancamentoCaixa.setFinPlanoContas(finPlanoContas);
 				BigDecimal valorTotal = getObjeto().getAgendamentoValores().getValorParcial().subtract(finLancamentoCaixa.getValor());
 				getObjeto().getAgendamentoValores().setValorTotal(valorTotal);
@@ -276,7 +287,7 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 	        try {	            
 	            if (!getObjeto().getListaAgendamentoServico().contains(agendamentoServico)) {	            	
 	            	somarHorario();
-	            	filtrarAgendamentoServico();
+                    //filtrarAgendamentoServico();
 	            	if(getObjeto().getDataFim() == null) {
 	            		getObjeto().setDataFim(getAgendamentoServico().getDataInicio());
 	            	}
@@ -300,15 +311,15 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 	 
 	 public void filtrarAgendamentoServico() throws Exception{ 
 		 
-		 	filtro.setDataInicial(getAgendamentoServico().getDataInicio());		 	
+		 	filtro.setDataInicial(agendamentoServico.getDataInicio());		 	
 		 	filtro.setDataFinal(agendamentoServico.getDataFinal());
 		 	filtro.setStatusServico(agendamentoServico.getFuncionario().getNome());
 			this.agendamentosServicos = agendamentoServicoDao.filtrar(filtro);			
 			System.out.println("este é o retorno da pesquisa" + agendamentosServicos);
 		}
 	 public void subtrairTotal() {
-		BigDecimal novoValor = agendamentoValores.getValorParcial().subtract(agendamentoServicoSelecionado.getValor());
-		agendamentoValores.setValorParcial(novoValor);
+		BigDecimal novoValor = agendamentoServicoSelecionado.getAgendamento().getAgendamentoValores().getValorParcial().subtract(agendamentoServicoSelecionado.getValor());
+		agendamentoServicoSelecionado.getAgendamento().getAgendamentoValores().setValorParcial(novoValor);
 		calculaTotal();
 		 
 	 }
@@ -375,58 +386,48 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
         }
         return listaContas;
     }
- 
-	
-	public void finalizarPagamentoDinheiro() {				
-		try {
-			finContas = new FinContas();
-			finPlanoContas = new FinPlanoContas();
-			finLancamentoCaixa = new FinLancamentoCaixa();
-			finLancamentoCaixaDao = new DaoGenerico<>(FinLancamentoCaixa.class);
-			finPlanoContas = getListaPlanoContas().get(0);
-			finContas = getListaContas().get(0);
-			finLancamentoCaixa.setFormaPagamento("DINHEIRO");
-			finLancamentoCaixa.setValor(agendamentoValores.getValorTotal());
-			finLancamentoCaixa.setClienteFornecedor(agendamento.getCliente().getNome());
-			finLancamentoCaixa.setAgendamento(agendamento);
-			finLancamentoCaixa.setData(new Date());
-			finLancamentoCaixa.setDescricao("Recebimento serviço");
-			finLancamentoCaixa.setFinPlanoContas(finPlanoContas);
-			finLancamentoCaixa.setFinContas(finContas);
-			finLancamentoCaixa.setTipo("Credito");			
-			finLancamentoCaixaDao.merge(finLancamentoCaixa);
-			FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_INFO, "Finalizado com sucesso!", null);			
-			
-		} catch (Exception e) {
-			FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_ERROR, "Nao foi possivel finalizar!", null);
-			e.printStackTrace();
-		}
-		
-	}
 	
 	public void finalizarServico (ActionEvent evento) {
+			agendamento = new Agendamento();
+			agendamento = (Agendamento) evento.getComponent().getAttributes().get("agendamentoFinalizar");
+			finLancamentoCaixa = new FinLancamentoCaixa();
+			finLancamentoCaixa.setData(new Date());
+			finLancamentoCaixa.setValor(agendamento.getAgendamentoValores().getValorTotal()); 		
+	}
+	
+	public void salvarPagamento(ActionEvent evento) {
 		
 		try {
-			agendamento = new Agendamento();
-			agendamento = (Agendamento) evento.getComponent().getAttributes().get("agendamentoFinalizar");		
+			DaoGenerico<FinLancamentoCaixa> finlancamentoCaixadao = new DaoGenerico<>(FinLancamentoCaixa.class);				
 			agendamento.setStatus("FINALIZADO");			
 			agendamento = dao.merge(agendamento);
+			finPlanoContas = new FinPlanoContas();
+			finPlanoContas = getListaPlanoContas().get(0);
+			finLancamentoCaixa.setAgendamento(agendamento);
+			finLancamentoCaixa.setCliente(agendamento.getCliente());
+			finLancamentoCaixa.setFinPlanoContas(finPlanoContas);
+			finLancamentoCaixa.setTipo("Credito");	
+			finLancamentoCaixa.setDescricao("Recebimento caixa");
+			finlancamentoCaixadao.merge(finLancamentoCaixa);
+			FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_INFO, "Finalizado com sucesso!", null);	
 		} catch (Exception e) {			
 			e.printStackTrace();
 		}		
+		
 	}
 	
 	public void filtrar() throws Exception{
-		
+		if(filtro.getDataInicial() != null && filtro.getDataFinal() != null) {
 		GregorianCalendar gc = new GregorianCalendar();
         gc.setTime(filtro.getDataFinal()); 
         gc.add(Calendar.HOUR, 23 );
         gc.add(Calendar.MINUTE, 59);	                
-        Date dataFinal = gc.getTime();       
-		
+        Date dataFinal = gc.getTime();
 		filtro.setDataFinal(dataFinal);
+		}
 		this.agendamentos = agendamentoDao.filtrar(filtro);
 		this.somarTotal = agendamentoDao.somarTotal(filtro);
+        
 		
 		
 	}

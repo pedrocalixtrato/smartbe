@@ -3,169 +3,250 @@
                 xmlns:f="http://java.sun.com/jsf/core"
                 xmlns:h="http://java.sun.com/jsf/html"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
-                xmlns:p="http://primefaces.org/ui">
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:sb="http://java.sun.com/jsf/composite/sb">
+              
 
     <ui:define name="gridDados">
-        <p:panel style="border: none" header="Agendamento"
-                 rendered="#{!agendamentoController.podeConsultar()}">
-            <p:outputLabel value="Você não possui acesso a esta função" />
-        </p:panel>
+        	<h:form id="frmCalendario">
+		
+				<p:panelGrid columnClasses="value">
+					<p:schedule id="schedule"
+						value="#{agendaCalendarioController.eventModel}" widgetVar="myschedule"
+						timeZone="America/Sao_Paulo" locale="pt">
+						
+						<p:ajax event="eventSelect" listener="#{agendaCalendarioController.eventoSelecionado}" update="schedule" oncomplete="PF('dlg').show();" />
+						<p:ajax event="dateSelect" listener="#{agendaCalendarioController.quandoNovo}" update="form1:frmCalendario:dlgAgenda"  oncomplete="PF('dlg').show();" />
+						<p:ajax event="eventMove" listener="#{agendaCalendarioController.onEventMove}" update="schedule" />
+		           		<p:ajax event="eventResize" listener="#{agendaCalendarioController.onEventResize}" update="schedule" />
+									
+					</p:schedule>
+				</p:panelGrid>			
+			<p:dialog id="dlgAgenda" widgetVar="dlg"  resizable="true"
+				modal="true" showEffect="clip" height="430" width="400" >	
+					
+					<p:tabView id="tabAgenda" activeIndex="#{agendaCalendarioController.tabIndex}">
+					<p:tab title="Geral" disabled="#{agendaCalendarioController.abaGeral}" >						
+							<div class="ui-g">
+								<div class="ui-g-12" style="margin-top: 4%" >
+									<h:panelGroup styleClass="md-inputfield">
+										<h:outputLabel
+											value="Código #{agendamentoController.objeto.id}" />
+									</h:panelGroup>
+								</div>
+								<div class="ui-g-12" style="margin-top: 4%">
+									<h:panelGroup styleClass="md-inputfield">
 
-        <p:outputPanel id="outputPanelGrid">
-            <p:outputPanel rendered="#{agendamentoController.telaGrid}">
-                <p:panel id="panelCentroGrid" style="border: none" header="Agendamento"
-                         rendered="#{agendamentoController.podeConsultar()}">
+										<p:autoComplete style="margin-top:20px" placeholder="Cliente"											
+											value="#{agendaCalendarioController.objeto.cliente}"
+											completeMethod="#{agendaCalendarioController.getListaCliente}"
+											var="objeto" itemLabel="#{objeto.nome}" itemValue="#{objeto}"
+											converter="clienteConverter" minQueryLength="3"
+											maxResults="10" size="70"
+											emptyMessage="Nenhum registro encontrado">
+										</p:autoComplete>
+									</h:panelGroup>
+								</div>
 
-                    <p:dataTable id="dataTableAgendamento" var="obj"
-                                 value="#{agendamentoController.dataModel}" paginator="true" rows="10"
-                                 rowsPerPageTemplate="5,10,15,20"
-                                 selection="#{agendamentoController.objetoSelecionado}"
-                                 selectionMode="single" resizableColumns="true" lazy="true">
+								<div class="ui-g-12" style="margin-top: 4%">
+									<h:panelGroup styleClass="md-inputfield">
+										<p:inputText placeholder="Telefone"
+											value="#{agendaCalendarioController.cliente.telefone}"
+											rendered="#{empty agendaCalendarioController.objeto.cliente.id}" />
+										<p:inputText placeholder="Telefone teste"
+											value="#{agendaCalendarioController.objeto.cliente.telefone}"											
+											rendered="#{not empty agendaCalendarioController.objeto.cliente.id}" />
+									</h:panelGroup>
+								</div>
 
-                        <f:facet name="header">
-                            <p:commandButton title="Novo" icon="ui-icon-plus"
-                                             actionListener="#{agendamentoController.incluir()}"
-                                             update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
-                                             disabled="#{!agendamentoController.podeInserir()}" />
-                            <p:commandButton process="dataTableAgendamento" title="Detalhes"
-                                             icon="ui-icon-zoom-in"
-                                             actionListener="#{agendamentoController.alterar()}"
-                                             update=":form1:outputPanelGrid,:form1:outputPanelDetalhe" />
-                            <p:commandButton process="dataTableAgendamento" title="Excluir"
-                                             icon="ui-icon-trash" actionListener="#{agendamentoController.excluir()}"
-                                             update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
-                                             disabled="#{!agendamentoController.podeExcluir()}">
-                                <p:confirm header="Confirmação" message="Confirma Exclusão?"
-                                           icon="ui-icon-alert" />
-                            </p:commandButton>
-                        </f:facet>
-                        
-                        <p:column headerText="Data">
-			                 <h:outputLabel value="#{obj.dataInicio}" >
-			                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="GMT-03:00" />
-			                 </h:outputLabel>
-			            </p:column>
-                        
-                        <p:column headerText="Cliente">
-			                <h:outputLabel value="#{obj.cliente.nome}" />
-			            </p:column>			            
-			            
-			            <p:column headerText="Funcionario">
-			                 <h:outputLabel value="#{obj.funcionario.nome}" />
-			            </p:column>			            
-			            
-			            
-                    </p:dataTable>
-                </p:panel>
-            </p:outputPanel>
+								<div class="ui-g-12" style="margin-top: 10%">
+									<h:panelGroup styleClass="md-inputfield">
+										<p:inputTextarea placeholder="Observação"
+											value="#{agendaCalendarioController.objeto.observacao}" rows="6"
+											cols="33" />
+									</h:panelGroup>
+								</div>
+								
+								<div class="ui-g-12" style="margin-left: 73%; ">							 
+								<p:commandButton value="Proximo" 
+			                                     actionListener="#{agendaCalendarioController.proximoTab()}"
+			                                     update="form1:frmCalendario:dlgAgenda"
+			                                     oncomplete="PF('dlg').show();" />
+			               
+								</div>
+							</div>
+							
+								
+						</p:tab>
+						
+						<p:tab title="Serviços" id="tbServico" disabled="#{agendaCalendarioController.abaServico}" >
+						
+						<div class="ui-g">						
+						<p:dataTable id="dataTableLancamentoServico" var="obj"
+											value="#{agendaCalendarioController.objeto.listaAgendamentoServico}"
+											paginator="true" rows="10" rowsPerPageTemplate="5,10,15,20"
+											selection="#{agendaCalendarioController.agendamentoServicoSelecionado}"
+											reflow="true" selectionMode="single" rowKey="#{obj.servico}"
+											paginatorPosition="bottom" sortOrder="servico">	
+											
+												<f:facet name="header">
+													<p:commandButton title="Novo" icon="ui-icon-plus"
+														actionListener="#{agendaCalendarioController.incluirServico()}"												
+														oncomplete="PF('dialogServico').show()"
+														update=":form1:growl,:formOutrasTelas:panelServico,:formOutrasTelas:dialogServico"/>													
+														
+													<p:commandButton process="dataTableLancamentoServico"
+														title="Detalhes" icon="ui-icon-zoom-in"
+														oncomplete="PF('dialogServico').show()"
+														actionListener="#{agendaCalendarioController.alterarServico()}"
+														 />
+													<p:commandButton process="dataTableLancamentoServico"
+														title="Excluir" icon="ui-icon-trash"														
+														actionListener="#{agendaCalendarioController.excluirServico}">
+														<p:confirm header="Confirmação" message="Confirma Exclusão?"
+															icon="ui-icon-alert" />
+													</p:commandButton>
+												</f:facet>
+		
+												<p:column headerText="Descrição">
+													<h:outputLabel value="#{obj.servico.descricao}" />
+												</p:column>
+												<p:column headerText="Funcionario">
+													<h:outputLabel value="#{obj.funcionario.nome}" />
+												</p:column>
+												<p:column headerText="Valor">
+													<h:outputLabel value="R$ #{obj.valor}" >
+									                    <f:convertNumber pattern="#,###,##0.00" />
+									                </h:outputLabel>
+												</p:column>	
+											</p:dataTable>
+											<div style="margin-top: 20%">				 
+											<p:commandButton value="Anterior" 
+						                                     actionListener="#{agendaCalendarioController.anteriorTab()}"
+						                                     update="form1:frmCalendario:dlgAgenda, :form1:frmCalendario:tabAgenda:dataTableLancamentoServico" 
+						                                     oncomplete="PF('dlg').show();" />
+											</div>
+											<div class="ui-g-12" style="margin-left: 73%;margin-top: -11.45%">							 
+											<p:commandButton value="Proximo" 
+						                                     actionListener="#{agendaCalendarioController.proximoTab()}"
+						                                     update="form1:frmCalendario:dlgAgenda"
+						                                     oncomplete="PF('dlg').show();" />
+						               
+											</div>
+							</div>			            
+						</p:tab>
+						<p:tab title="Adiantamento" disabled="#{agendaCalendarioController.abaAdiantamento}">
+							<p:panelGrid>										 
+								<p:commandButton value="Proximo" style="float:right"
+			                                     actionListener="#{agendaCalendarioController.proximoTab()}"
+			                                     update="form1:frmCalendario:dlgAgenda"
+			                                     oncomplete="PF('dlg').show();" />
+			                </p:panelGrid>	
+											
+						</p:tab>
+						<p:tab title="Totais" disabled="#{agendaCalendarioController.abaTotais}">
+									 
+							
+						</p:tab>
+						</p:tabView>
+				
+			
+			</p:dialog>			
 
-        </p:outputPanel>
+		</h:form>	
+			<script >PrimeFaces.locales['pt'] = {
+		        closeText: 'Fechar',
+		        prevText: 'Anterior',
+		        nextText: 'Próximo',
+		        currentText: 'Começo',
+		        monthNames: ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'],
+		        monthNamesShort: ['Jan','Fev','Mar','Abr','Mai','Jun', 'Jul','Ago','Set','Out','Nov','Dez'],
+		        dayNames: ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'],
+		        dayNamesShort: ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'],
+		        dayNamesMin: ['D','S','T','Q','Q','S','S'],
+		        weekHeader: 'Semana',
+		        firstDay: 1,
+		        isRTL: false,
+		        showMonthAfterYear: false,
+		        yearSuffix: '',
+		        timeOnlyTitle: 'Só Horas',
+		        timeText: 'Tempo',
+		        hourText: 'Hora',
+		        minuteText: 'Minuto',
+		        secondText: 'Segundo',
+		        currentText: 'Data Atual',
+		        ampm: false,
+		        month: 'Mês',
+		        week: 'Semana',
+		        day: 'Dia',
+		        allDayText : 'Todo Dia'
+		    };</script>
 
     </ui:define>
+    
+    <ui:define name="outrasTelas">
+        <h:form id="formOutrasTelas">
+            <p:dialog id="dialogServico"
+                      header="Inclusão/Alteração de Serviço"
+                      widgetVar="dialogServico" showEffect="slide" hideEffect="slide"
+                      resizable="true" modal="true" closable="false" width="600"
+                      visible="#{agendaCalendarioController.podeIncluirServico}">
+
+                <p:outputPanel id="panelServico">
+                <p:panelGrid >
+                <div class="t2ti-campo-60" style="margin-top:15px;padding-bottom: 5%;" >           		 
+                <p:outputLabel value="Descrição  "
+                           for="servico" />
+                <p:autoComplete id="servico"           					         					
+                            value="#{agendaCalendarioController.agendamentoServico.servico}"
+                            completeMethod="#{agendamentoController.getListaServico}" var="objeto"
+                            itemLabel="#{objeto.descricao}" itemValue="#{objeto}"
+                            converter="com.smartbe.model.bean.converter.defaultConverter" forceSelection="true"
+                            minQueryLength="3" maxResults="10" 
+                             emptyMessage="Nenhum registro encontrado" >                     
+                </p:autoComplete>                
+                </div>
+                
+                <div style="float: right;width: 18%;margin-right:20%;
+                padding-right: 2%;padding-bottom: 5%;">
+	                <p:outputLabel value="Data servico"/>
+	               	<p:calendar pattern="dd/MM/yyyy HH:mm" mask="true"
+								value="#{agendaCalendarioController.agendamentoServico.dataInicio}"
+								timeZone="GMT-03:00" />
+                </div>
+                
+                   <div class="t2ti-campo-60" style="margin-top:15px" >
+                   		<p:outputLabel value="Funcionario " for="funcionario" />
+		                <p:autoComplete id="funcionario"           					         					
+		                            value="#{agendaCalendarioController.agendamentoServico.funcionario}"
+		                            completeMethod="#{agendamentoController.getListaFuncionario}" var="objeto"
+		                            itemLabel="#{objeto.nome}" itemValue="#{objeto}"
+		                            converter="com.smartbe.model.bean.converter.defaultConverter" forceSelection="true"
+		                            minQueryLength="3" maxResults="10" 
+		                             emptyMessage="Nenhum registro encontrado" >                     
+		                </p:autoComplete>
+                   </div> 
+                    <sb:campoDecimal  styleClass="t2ti-campo-20"
+                                       idComponente="nfeServicoValor" label="Valor"
+                                       nomeAtributo="#{agendaCalendarioController.agendamentoServico.valor}"
+                                       requerido="true" />
+					</p:panelGrid>
+                </p:outputPanel>
+
+                <f:facet name="footer">
+                    <p:commandButton value="Salvar"
+                                     actionListener="#{agendaCalendarioController.salvarServico}"
+                                     update=":formOutrasTelas:panelServico,:form1:growl, :form1:frmCalendario:dlgAgenda"                                  	
+                                     oncomplete="if (!args.validationFailed) {PF('dialogServico').hide();} PF('dlg').show();" />
+                    <p:commandButton value="Cancelar"
+                                     oncomplete="PF('dialogServico').hide();" />
+
+                </f:facet>
+            </p:dialog>
+        </h:form>
+        </ui:define>
 
     <ui:define name="telaInclusaoAlteracao">
-        <p:outputPanel id="outputPanelDetalhe">
-            <p:outputPanel rendered="#{!agendamentoController.telaGrid}">
-                <p:panel id="panelCentroDetalhe" style="border:none" header="Agendamento">
-
-                    <p:outputLabel value="Nenhum registro selecionado."
-                                   rendered="#{empty agendamentoController.objeto}" />
-                    <p:commandButton value="Voltar"
-                                     actionListener="#{agendamentoController.voltar()}"
-                                     update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
-                                     rendered="#{empty agendamentoController.objeto}" />
-				
-                    <p:outputPanel rendered="#{not empty agendamentoController.objeto}">                            
-                            <div class="ui-g" >
-                            <div class="t2ti-campo-20" >
-                            <p:outputLabel value="Data Inicio" />
-                            <p:calendar pattern="dd/MM/yyyy HH:mm" mask="true"
-                             value="#{agendamentoController.objeto.dataInicio}"
-                             timeZone="GMT-03:00"/>  
-                             </div>                         
-                            
-                            <div class="t2ti-campo-20" >
-                            <p:outputLabel value="Data Fim" />
-                            <p:calendar mask="true" 
-                             value="#{agendamentoController.objeto.dataFim}"
-                             pattern="dd/MM/yyyy HH:mm" timeZone="GMT-03:00"/>
-                             </div>  
-                             <p:spacer/>  
-                             <p:spacer/>                                                      
-                            
-                            <div class="t2ti-campo-40" > 
-                            <p:outputLabel value="Cliente" />                                                       			            
-				            <p:autoComplete         					
-				                value="#{agendamentoController.objeto.cliente}"
-				                completeMethod="#{agendamentoController.getListaCliente}" var="objeto"
-				                itemLabel="#{objeto.nome}" itemValue="#{objeto}"
-				                converter="clienteConverter" forceSelection="true"
-				                minQueryLength="3" maxResults="10" size="70"
-				                emptyMessage="Nenhum registro encontrado" >                    
-				            </p:autoComplete>
-				            </div>
-                            
-                              <div class="t2ti-campo-20" >                         
-                             <p:outputLabel value="Serviço" />                           			            
-				            <p:autoComplete id="servico"        					
-				                value="#{agendamentoController.objeto.servico}"
-				                completeMethod="#{agendamentoController.getListaServico}" var="objeto"
-				                itemLabel="#{objeto.descricao}" itemValue="#{objeto}"
-				                converter="servicoConverter" forceSelection="true"
-				                minQueryLength="3" maxResults="10" size="70"
-				                emptyMessage="Nenhum registro encontrado" >                    
-				            </p:autoComplete>
-				            </div>
-				            
-				            <div class="t2ti-campo-10" > 
-				            <p:outputLabel value="Valor" />
-                            <p:inputNumber 
-                            value="#{agendamentoController.objeto.valor}" 
-                            decimalSeparator="," thousandSeparator="."
-                            decimalPlaces="2" minValue="-100000000000">
-           					</p:inputNumber>
-           					</div>
-				            
-				            <div class="t2ti-campo-40" > 
-				            <p:outputLabel value="Funcionario" />                           			            
-				            <p:autoComplete id="funcionario"        					
-				                value="#{agendamentoController.objeto.funcionario}"
-				                completeMethod="#{agendamentoController.getListaFuncionario}" var="objeto"
-				                itemLabel="#{objeto.nome}" itemValue="#{objeto}"
-				                converter="funcionarioConverter" forceSelection="true"
-				                minQueryLength="3" maxResults="10" size="70"
-				                emptyMessage="Nenhum registro encontrado" >                    
-				            </p:autoComplete>
-				            </div>
-				             			             
-				            </div> 
-           					<br />              
-                       
-                    </p:outputPanel>
-
-                    <p:outputPanel rendered="#{not empty agendamentoController.objeto}"
-                                   styleClass="t2ti-campo-100">
-
-                        <p:commandButton value="Incluir"
-                                         rendered="#{empty agendamentoController.objeto.id}"
-                                         actionListener="#{agendamentoController.salvar()}"
-                                         update=":form1:growl,:form1:outputPanelGrid,:form1:outputPanelDetalhe"
-                                         disabled="#{!agendamentoController.podeInserir()}" />
-                        <p:commandButton value="Alterar"
-                                         rendered="#{not empty agendamentoController.objeto.id}"
-                                         actionListener="#{agendamentoController.salvar()}"
-                                         update=":form1:growl,:form1:outputPanelGrid,:form1:outputPanelDetalhe"
-                                         disabled="#{!agendamentoController.podeAlterar()}" />
-                        <p:commandButton value="Fechar"
-                                         actionListener="#{agendamentoController.voltar()}"
-                                         update=":form1:outputPanelGrid,:form1:outputPanelDetalhe"
-                                         process="@this" />
-
-                    </p:outputPanel>
-                </p:panel>
-            </p:outputPanel>
-
-        </p:outputPanel>
-
+        
     </ui:define>
 </ui:composition>

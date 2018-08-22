@@ -3,11 +3,14 @@
                 xmlns:f="http://java.sun.com/jsf/core"
                 xmlns:h="http://java.sun.com/jsf/html"
                 xmlns:ui="http://java.sun.com/jsf/facelets"
-                xmlns:p="http://primefaces.org/ui">
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:x="http://xpert.com/faces"
+                xmlns:sb="http://java.sun.com/jsf/composite/sb">
                 
 
 	<ui:define name="gridDados">
-		
+	 <p:outputPanel id="outputPanelGrid">
+            <p:outputPanel rendered="#{agendamentoController.telaGrid}">
 		<h1>Pesquisa de Lançamentos</h1>
 		
 				<div class="ui-g" >
@@ -42,30 +45,56 @@
 				<p:toolbarGroup>						
 <!-- 					<p:inputText/>					 -->
 					<p:commandButton value="Pesquisar" style="margin-top:5px;background-color:#FF69B4"
-									 actionListener="#{agendamentoController.filtrar}" 
-									 update="@form"/>					
+									 actionListener="#{agendamentoController.filtrar()}" 
+									 oncomplete="PF('dataTableAgendamento').filter()" update="@form" />					
 				</p:toolbarGroup>
-			</p:toolbar>
-			
-			</ui:define>
-
-		<ui:define name="telaInclusaoAlteracao">
-		<p:outputPanel id="outputPanelGrid">                            
+			</p:toolbar>			
+		
+		                           
 			<p:dataTable id="lancamentosTable"
-				var="lancVar" value="#{agendamentoController.agendamentos}"
+				var="lancVar" value="#{agendamentoController.dataModel}" widgetVar="dataTableAgendamento"
 				style="margin-top: 20px" emptyMessage="Nenhum registro encontrado."
-				rows="10" paginator="true" paginatorAlwaysVisible="true"
-				rowsPerPageTemplate="5,10,15,20"
-				resizableColumns="true" reflow="true">
+				rows="5" paginator="true" reflow="true" paginatorAlwaysVisible="true"
+				rowsPerPageTemplate="5,10,15,20" sortField="id" sortOrder="DESCENDING"
+				selection="#{agendamentoController.objetoSelecionado}"
+				selectionMode="single" resizableColumns="true" lazy="true">
                                			
-                                                               
+                      <f:facet name="header"> 
+                      
+                      <p:outputPanel style="width: 25%; float: left;" >
+                                <p:outputPanel style="width: 70%; float: left;color:#F5F5DC">                                	
+                                    
+                                    <p:inputText id="globalFilter" placeholder="Pesquisar..." style="color:#F5F5DC" />
+                                </p:outputPanel>
+                                <p:outputPanel style="width: 20%; float: right;" >
+                                    <p:commandButton type="button" icon="ui-icon-search" onclick="PF('dataTableAgendamento').filter()" />
+                                </p:outputPanel>
+                       </p:outputPanel>                       	
+                      
+						<p:commandButton title="Novo" icon="ui-icon-plus" 
+							actionListener="#{agendamentoController.incluir()}"	
+							update=":form1:outputPanelGrid, form1:pnlInclu"						
+							disabled="#{!agendamentoController.podeInserir()}" />
+						<p:commandButton  title="Detalhes"
+                            icon="ui-icon-zoom-in" update=":form1:outputPanelGrid,:form1:pnlInclu"
+                            actionListener="#{agendamentoController.alterar()}" />
+						<p:commandButton title="Excluir"
+							icon="ui-icon-trash" style="margin-right:30%;"
+							actionListener="#{agendamentoController.excluir()}"															
+						    disabled="#{!agendamentoController.podeExcluir()}"
+						    update=":form1:growl,:form1:outputPanelGrid, :form1:pnlInclu">
+						<p:confirm header="Confirmação" message="Confirma Exclusão?"
+							icon="ui-icon-alert" />
+						</p:commandButton>
+					</f:facet>                                         
 				
 					<f:facet name="footer">
 						<p:outputLabel value="Total: " />
 						<h:outputText value="#{agendamentoController.somarTotal}" />
 					</f:facet>									
 				
-				<p:column headerText="Data" sortBy="#{lancVar.dataFim}" style="text-align: center; width: 180px">
+				<p:column headerText="Data" sortBy="#{lancVar.dataFim}" filterBy="#{lancVar.dataFim}" style="text-align: center; width: 180px">
+								    		
 					<h:outputText value="#{lancVar.dataFim}" >
 						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="GMT-03:00"/>
 					</h:outputText>
@@ -81,8 +110,8 @@
 			        </h:outputLabel>
 				</p:column>
 				
-				<p:column headerText="Funcionario">
-					<h:outputText  />
+				<p:column headerText="Observação">
+					<h:outputText value="#{lancVar.observacao}" />
 				</p:column>	
 				
 				<p:column headerText="Status" style="text-align: center; width: 100px">
@@ -92,7 +121,7 @@
 					<f:attribute value="#{lancVar}" name="agendamentoSelecionado" />
 					</p:commandButton>
 					<p:commandButton value="Finalizar" style="background-color:#FF69B4;" 
-					update=":form1:growl,:formOutrasTelas:panelPagamento,:formOutrasTelas:dialogPagamento" 
+					update=":form1:growl,:formOutrasTelas"
 					rendered="#{lancVar.status == 'INICIADO'}" 
 					actionListener="#{agendamentoController.finalizarServico}" 
 					process="@this"
@@ -106,6 +135,8 @@
 				</p:column>
 				
 			</p:dataTable>
+			
+			</p:outputPanel>
 			</p:outputPanel>
 			</ui:define>
 			
@@ -117,30 +148,320 @@
 			</p:confirmDialog>	
 			
 			<ui:define name="outrasTelas">
-		        <h:form id="formOutrasTelas">
+		        
+		    </ui:define>
+		    <ui:define name="telaInclusaoAlteracao">	
+		  <p:outputPanel id="pnlInclu">
+			<p:outputPanel  rendered="#{!agendamentoController.telaGrid}">
+				<div class="ui-g dashboard">									
+							<div class="ui-g-12 ui-md-6 ui-lg-4 ui-fluid contact-form">
+				                <p:panel header="Geral" style="min-height:360px" styleClass="ui-shadow-content">
+				                    <div class="ui-g">
+				                    	<div class="ui-g-12" style="width: 22%" >
+				                            <h:panelGroup styleClass="md-inputfield">				                            	
+				                            	<h:outputLabel  value="Código #{agendamentoController.objeto.id}" />				                                
+				                            </h:panelGroup>				                            
+				                        </div>
+				                        <div class="ui-g-12" style="margin-top:4%" >
+				                        	 <h:panelGroup styleClass="md-inputfield">
+						                        
+												<p:autoComplete style="margin-top:20px" placeholder="Cliente"
+													value="#{agendamentoController.objeto.cliente}"
+													completeMethod="#{agendamentoController.getListaCliente}"
+													var="objeto" itemLabel="#{objeto.nome}" itemValue="#{objeto}"
+													converter="clienteConverter" 
+													minQueryLength="3"  maxResults="10" size="70"
+													emptyMessage="Nenhum registro encontrado">
+												</p:autoComplete>
+											 </h:panelGroup>
+				                        </div>
+				                        
+				                        <div class="ui-g-12" style="margin-top:4%" >
+				                        	 <h:panelGroup styleClass="md-inputfield">						                       
+												<p:inputText placeholder="Telefone" 
+												value="#{agendamentoController.cliente.telefone}" 
+												rendered="#{empty agendamentoController.objeto.cliente.id}"	/>	
+												<p:inputText placeholder="Telefone teste" 
+												value="#{agendamentoController.objeto.cliente.telefone}" 
+												rendered="#{not empty agendamentoController.objeto.cliente.id}"	/>			
+											 </h:panelGroup>
+				                        </div>
+				                        
+				                        <div class="ui-g-12" style="margin-top:10%">
+				                            <h:panelGroup styleClass="md-inputfield">
+				                                <p:inputTextarea placeholder="Observação"
+												value="#{agendamentoController.objeto.observacao}" rows="6"
+												cols="33" />
+				                            </h:panelGroup>				                            
+				                        </div>
+				                        
+				                    </div>				                    
+				                </p:panel>
+				            </div>
+				            
+				            <div class="ui-g-12 ui-md-8">
+	                			<div class="card">					                    
+					                        <p:dataTable id="dataTableLancamentoServico" var="obj"
+											value="#{agendamentoController.objeto.listaAgendamentoServico}"
+											paginator="true" rows="10" rowsPerPageTemplate="5,10,15,20"
+											selection="#{agendamentoController.agendamentoServicoSelecionado}"
+											reflow="true" selectionMode="single" rowKey="#{obj.servico}"
+											paginatorPosition="bottom" sortOrder="servico">
+											
+												<f:facet name="header">
+													<p:commandButton title="Novo" icon="ui-icon-plus"												
+														actionListener="#{agendamentoController.incluirServico()}"
+														update=":form1:growl,:formOutrasTelas:panelServico,:formOutrasTelas:dialogServico"/>													
+														
+													<p:commandButton process="dataTableLancamentoServico"
+														title="Detalhes" icon="ui-icon-zoom-in"
+														oncomplete="PF('dialogServico').show()"
+														actionListener="#{agendamentoController.alterarServico()}"
+														update=":formOutrasTelas:panelServico" />
+													<p:commandButton process="dataTableLancamentoServico"
+														title="Excluir" icon="ui-icon-trash"
+														update="dataTableLancamentoServico, :form1:pnlTotais"
+														actionListener="#{agendamentoController.excluirServico}">
+														<p:confirm header="Confirmação" message="Confirma Exclusão?"
+															icon="ui-icon-alert" />
+													</p:commandButton>
+												</f:facet>
+		
+												<p:column headerText="Descrição">
+													<h:outputLabel value="#{obj.servico.descricao}" />
+												</p:column>
+												<p:column headerText="Funcionario">
+													<h:outputLabel value="#{obj.funcionario.nome}" />
+												</p:column>
+												<p:column headerText="Valor">
+													<h:outputLabel value="R$ #{obj.valor}" >
+									                    <f:convertNumber pattern="#,###,##0.00" />
+									                </h:outputLabel>
+												</p:column>	
+											</p:dataTable>
+					                  
+				               	</div>
+				            </div>
+				            
+				            <div class="ui-g-12 ui-md-6 ui-lg-4 ui-fluid contact-form">
+				                <p:panel header="Dados adiantamento" style="min-height:360px" styleClass="ui-shadow-content">
+				                    <div class="ui-g">
+				                    	<div class="ui-g-12" style="width: 22%" >
+				                            <h:panelGroup styleClass="md-inputfield">
+				                            	<h:outputLabel  value="Código #{agendamentoController.finLancamentoCaixa.id}" />
+				                            </h:panelGroup>				                            
+				                        </div>
+				                        <div class="ui-g-12" style="margin-top:5%" >
+				                            <h:panelGroup styleClass="md-inputfield">
+				                                <p:calendar pattern="dd/MM/yyyy" value="#{agendamentoController.finLancamentoCaixa.data}"/>
+				                                <label>Data</label>
+				                            </h:panelGroup>			                            
+				                        </div>
+				                        <div class="ui-g-12" >				                        
+				                            <p:selectOneMenu
+				                             value="#{agendamentoController.finLancamentoCaixa.finContas}"                              
+				                             converter="contasConverter">
+				                            <f:selectItem itemValue="" itemLabel="Selecione a conta"/>
+								            <f:selectItems value="#{lancamentoCaixaController.listaContas}" var="objeto"
+								                              itemLabel="#{objeto.nomeBanco}" itemValue="#{objeto}"/>
+								            </p:selectOneMenu>
+				                            
+				                        </div>
+				                        <div class="ui-g-12">
+				                            <h:panelGroup styleClass="md-inputfield">
+				                                <p:inputText value="#{agendamentoController.finLancamentoCaixa.valor}"/>
+				                                <label>Valor</label>
+				                            </h:panelGroup>
+				                        </div>				                        
+				                        <div class="ui-g-12">
+				                            <h:panelGroup styleClass="md-inputfield">
+				                                <p:inputTextarea placeholder="Observação"
+				                                value="#{agendamentoController.finLancamentoCaixa.descricao}"
+												rows="6"
+												cols="33" />
+				                            </h:panelGroup>
+				                        </div>
+				                    </div>
+				                   
+				                </p:panel>
+				            </div> 
+				            
+				            <div class="ui-g-12 activity-feed" style="padding: 1%;width: 66.65%;min-width: 255px;" >
+				                <p:panel id="pnlTotais" header="Totais" styleClass="ui-shadow-content" style="height: 100%;" >				                    
+				                    <div class="ui-g" style="margin-left:10%;margin-top:6%">
+				                        <div class="ui-g-12 ui-md-3" style="margin-right:7%">
+				                            <span>Total parcial</span>
+				                            <div class="knob income" style="font-size:23px">
+				                            	<h:outputLabel value="#{agendamentoController.objeto.agendamentoValores.valorParcial}" >
+					                            <f:convertNumber pattern="R$#,##0.00"/>					                            
+					                            </h:outputLabel>
+				                            </div>
+				                        </div>
+				                        <div class="ui-g-12 ui-md-3" style="margin-right:7%" >
+				                            <span>Desconto</span>
+				                            <div class="knob invoice" style="font-size:23px">
+				                            	<h:outputLabel value="#{agendamentoController.finLancamentoCaixa.valor}" >
+					                            <f:convertNumber pattern="R$#,##0.00"/>					                            
+					                            </h:outputLabel>
+				                            </div>
+				                        </div>
+				                        <div class="ui-g-12 ui-md-3" style="margin-right:7%" >
+				                            <span>Total geral</span>
+				                            <div class="knob tax" style="font-size:23px">
+					                            <h:outputLabel value="#{agendamentoController.objeto.agendamentoValores.valorTotal}" >
+					                            <f:convertNumber pattern="R$#,##0.00"/>					                            
+					                            </h:outputLabel>
+				                            </div>
+				                        </div>				                        	
+											<p:outputPanel rendered="#{not empty agendamentoController.objeto}"
+														   style="margin-left:15%;margin-top:4%" >
+						
+												<p:commandButton value="Incluir" style="width: 200px;"
+													rendered="#{empty agendamentoController.objeto.id}"
+													actionListener="#{agendamentoController.salvar()}"
+													update=":form1:growl,:form1:outputPanelGrid, :form1:pnlTotais"
+													disabled="#{!agendamentoController.podeInserir()}" />
+												<p:commandButton value="Salvar" style="width: 200px"
+													rendered="#{not empty agendamentoController.objeto.id}"
+													actionListener="#{agendamentoController.salvar()}"
+													update=":form1:growl,:form1:outputPanelGrid, :form1:pnlTotais"
+													disabled="#{!agendamentoController.podeAlterar()}" />
+												<p:commandButton value="Fechar" style="width: 200px"
+													actionListener="#{agendamentoController.voltar()}"
+													update=":form1:outputPanelGrid, :form1:pnlInclu"
+													process="@this" />
+													
+											</p:outputPanel>
+										 
+				                    </div>
+				                </p:panel>
+				            </div>
+			            
+					</div>
+										
+			</p:outputPanel>
+		</p:outputPanel>
+	</ui:define>
+	<ui:define name="outrasTelas">
+        <h:form id="formOutrasTelas">
+            <p:dialog id="dialogServico"
+                      header="Inclusão/Alteração de Serviço"
+                      widgetVar="dialogServico" showEffect="slide" hideEffect="slide"
+                      resizable="true" modal="true" closable="false" width="600"
+                      visible="#{agendamentoController.podeIncluirServico}">
+
+                <p:outputPanel id="panelServico">
+                <p:panelGrid >
+                <div class="t2ti-campo-60" style="margin-top:15px;padding-bottom: 5%;" >           		 
+                <p:outputLabel value="Descrição  "
+                           for="servico" />
+                <p:autoComplete id="servico"           					         					
+                            value="#{agendamentoController.agendamentoServico.servico}"
+                            completeMethod="#{agendamentoController.getListaServico}" var="objeto"
+                            itemLabel="#{objeto.descricao}" itemValue="#{objeto}"
+                            converter="com.smartbe.model.bean.converter.defaultConverter" forceSelection="true"
+                            minQueryLength="3" maxResults="10" 
+                             emptyMessage="Nenhum registro encontrado" >                     
+                </p:autoComplete>                
+                </div>
+                
+                <div style="float: right;width: 18%;margin-right:20%;
+                padding-right: 2%;padding-bottom: 5%;">
+	                <p:outputLabel value="Data servico"/>
+	               	<p:calendar pattern="dd/MM/yyyy HH:mm" mask="true"
+								value="#{agendamentoController.agendamentoServico.dataInicio}"
+								timeZone="GMT-03:00" />
+                </div>
+                
+                   <div class="t2ti-campo-60" style="margin-top:15px" >
+                   		<p:outputLabel value="Funcionario " for="funcionario" />
+		                <p:autoComplete id="funcionario"           					         					
+		                            value="#{agendamentoController.agendamentoServico.funcionario}"
+		                            completeMethod="#{agendamentoController.getListaFuncionario}" var="objeto"
+		                            itemLabel="#{objeto.nome}" itemValue="#{objeto}"
+		                            converter="com.smartbe.model.bean.converter.defaultConverter" forceSelection="true"
+		                            minQueryLength="3" maxResults="10" 
+		                             emptyMessage="Nenhum registro encontrado" >                     
+		                </p:autoComplete>
+                   </div> 
+                    <sb:campoDecimal  styleClass="t2ti-campo-20"
+                                       idComponente="nfeServicoValor" label="Valor"
+                                       nomeAtributo="#{agendamentoController.agendamentoServico.valor}"
+                                       requerido="true" />
+					</p:panelGrid>
+                </p:outputPanel>
+
+                <f:facet name="footer">
+                    <p:commandButton value="Salvar"
+                                     actionListener="#{agendamentoController.salvarServico}"
+                                     update=":formOutrasTelas:panelServico,:form1:growl,
+                                     form1:dataTableLancamentoServico, :form1:pnlTotais"                                     	
+                                     oncomplete="if (!args.validationFailed) {PF('dialogServico').hide();}" />
+                    <p:commandButton value="Cancelar"
+                                     oncomplete="PF('dialogServico').hide();" />
+
+                </f:facet>
+            </p:dialog>
+        </h:form>
+        <h:form id="formOutrasTelasP">
 		            <p:dialog id="dialogPagamento"
-		                      header="Forma de pagamento"
 		                      widgetVar="dialogPagamento" showEffect="slide" hideEffect="slide"
-		                      resizable="true" modal="true" closable="false" width="600">
-		
-		                <p:outputPanel id="panelPagamento">
-			                <p:panelGrid >
-			                 <div align="center">
-			                   <p:commandButton value="Dinheiro" actionListener="#{agendamentoController.finalizarPagamentoDinheiro}"
-			                   style="background-color:#FF69B4;margin-right:10px"
-			                   update=":formOutrasTelas:panelPagamento,:form1:growl,:formOutrasTelas:dialogPagamento,:form1" 			                   
-			                   oncomplete="if (!args.validationFailed) {PF('dialogPagamento').hide();}"/>			                   
-			                   <p:commandButton value="Cartão" style="background-color:#00CED1;margin-right:10px"/>
-			                   <p:commandButton value="Transferencia" style="margin-right:10px"/>
-			                   <p:commandButton value="A prazo" style="background-color:#CD3333;margin-right:10px"/>
-			                  </div>
-							</p:panelGrid>
-		                </p:outputPanel>
-		
+		                      resizable="true" modal="true" closable="false" width="350">
+			                 
+				                <p:panel header="Forma de pagamento" style="min-height:360px" styleClass="ui-shadow-content">
+				                    <div class="ui-g">
+				                    	<div class="ui-g-12" style="width: 22%" >
+				                            <h:panelGroup styleClass="md-inputfield">
+				                            	<h:outputLabel  value="Código #{agendamentoController.finLancamentoCaixa.id}" />
+				                            </h:panelGroup>				                            
+				                        </div>
+				                        
+				                        <div class="ui-g-12" style="margin-top:10%" >				                        
+				                            <p:selectOneMenu
+				                             value="#{agendamentoController.finLancamentoCaixa.formaPagamento}">
+				                            <f:selectItem itemValue="" itemLabel="Selecione o tipo"/>
+								            <f:selectItems value="#{agendamentoController.formaPagamento}"/>
+								            </p:selectOneMenu>
+				                            
+				                        </div>
+				                        
+				                        <div class="ui-g-12" style="margin-top:5%"  >
+				                            <h:panelGroup styleClass="md-inputfield">
+				                                <p:calendar pattern="dd/MM/yyyy" value="#{agendamentoController.finLancamentoCaixa.data}"/>
+				                                <label>Data</label>
+				                            </h:panelGroup>			                            
+				                        </div>
+				                        <div class="ui-g-12" >				                        
+				                            <p:selectOneMenu
+				                             value="#{agendamentoController.finLancamentoCaixa.finContas}"                              
+				                             converter="contasConverter">
+				                            <f:selectItem itemValue="" itemLabel="Selecione a conta"/>
+								            <f:selectItems value="#{lancamentoCaixaController.listaContas}" var="objeto"
+								                              itemLabel="#{objeto.nomeBanco}" itemValue="#{objeto}"/>
+								            </p:selectOneMenu>
+				                            
+				                        </div>
+				                        <div class="ui-g-12" style="margin-top:5%">
+				                            <h:panelGroup styleClass="md-inputfield">
+				                                <p:inputText value="#{agendamentoController.finLancamentoCaixa.valor}"/>
+				                                <label>Valor</label>
+				                            </h:panelGroup>
+				                        </div>				                        
+				                        <div class="ui-g-12">
+				                            <h:panelGroup styleClass="md-inputfield">
+				                                <p:inputTextarea placeholder="Observação"
+				                                value="#{agendamentoController.finLancamentoCaixa.descricao}"
+												rows="6"
+												cols="33" />
+				                            </h:panelGroup>
+				                        </div>
+				                    </div>
+				                   
+				                </p:panel>
 		                <f:facet name="footer">
 		                    <p:commandButton value="Salvar"		                                     
-		                                     update=":formOutrasTelas:panelPagamento,:form1:growl"
-		                                     	
+		                                     update=":formOutrasTelas,:form1:growl , :form1"
+		                                     actionListener="#{agendamentoController.salvarPagamento}"
 		                                     oncomplete="if (!args.validationFailed) {PF('dialogPagamento').hide();}" />
 		                    <p:commandButton value="Cancelar"
 		                                     oncomplete="PF('dialogPagamento').hide();" />
@@ -148,6 +469,13 @@
 		                </f:facet>
 		            </p:dialog>
 		        </h:form>
-		    </ui:define>	
-	
+    </ui:define>
+	<ui:define name="outrasTelas2">
+
+	</ui:define>
+	<ui:define name="outrasTelas3">
+
+	</ui:define>
+
+
 </ui:composition>

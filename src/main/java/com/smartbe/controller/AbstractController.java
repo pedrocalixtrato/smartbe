@@ -277,9 +277,11 @@ public abstract class AbstractController<T> implements Serializable {
 		vendaOrcamentoSituacao.put("Entregue", "E");
 
 		formaPagamento = new LinkedHashMap<>();
-		formaPagamento.put("0 - A Vista", "0");
-		formaPagamento.put("1 - A Prazo", "1");
-		formaPagamento.put("2 - Outros", "2");
+		formaPagamento.put("Dinheiro", "DINHEIRO");
+		formaPagamento.put("Credito", "CREDITO");
+		formaPagamento.put("Debito", "DEBITO");
+		formaPagamento.put("Cheque", "CHEQUE");
+		formaPagamento.put("a Prazo", "PRAZO");
 
 		vendaResponsavelFrete = new LinkedHashMap<>();
 		vendaResponsavelFrete.put("Emitente", "1");

@@ -3,15 +3,17 @@
     <persistence-unit name="smartbe" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.ejb.HibernatePersistence</provider>
         <properties>
-            <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://bancodb.cnpfnxgczxpe.us-east-1.rds.amazonaws.com:5432/dbsmartbe"/>
-            <property name="javax.persistence.jdbc.user" value="pedro"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/dbsmartbe"/>
+            <property name="javax.persistence.jdbc.user" value="postgres"/>
             <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
-            <property name="javax.persistence.jdbc.password" value="pedromi1993"/>
+            <property name="javax.persistence.jdbc.password" value="postgres"/>
             <property name="hibernate.show_sql" value="true" />
-            <property name="hibernate.format_sql" value="true" />            
+            <property name="hibernate.format_sql" value="true" />  
+            
+                      
             
             
-            
+            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect"/>
 			<property name="javax.persistence.schema-generation.create-source" value="metadata" />
 			<property name="javax.persistence.sql-load-script-source" value="META-INF/sql/carregar-dados.sql" />
 			<!-- validate | update | create | create-drop -->
