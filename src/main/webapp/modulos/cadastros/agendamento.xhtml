@@ -8,20 +8,24 @@
               
 
     <ui:define name="gridDados">
-        	<h:form id="frmCalendario">
-		
-				<p:panelGrid columnClasses="value">
-					<p:schedule id="schedule"
+    		
+        	<h:form id="frmCalendario" >
+        	<div >
+				<p:panelGrid columnClasses="value"  >
+					<p:schedule id="schedule" resizable="true" view="agendaWeek" 
 						value="#{agendaCalendarioController.eventModel}" widgetVar="myschedule"
-						timeZone="America/Sao_Paulo" locale="pt">
+						timeZone="America/Sao_Paulo" locale="pt" >
 						
-						<p:ajax event="eventSelect" listener="#{agendaCalendarioController.eventoSelecionado}" update="schedule" oncomplete="PF('dlg').show();" />
+						<p:ajax event="eventSelect" listener="#{agendaCalendarioController.eventoSelecionado}" update="form1:frmCalendario:tabAgenda" oncomplete="PF('dlg').show();" />
 						<p:ajax event="dateSelect" listener="#{agendaCalendarioController.quandoNovo}" update="form1:frmCalendario:dlgAgenda"  oncomplete="PF('dlg').show();" />
 						<p:ajax event="eventMove" listener="#{agendaCalendarioController.onEventMove}" update="schedule" />
 		           		<p:ajax event="eventResize" listener="#{agendaCalendarioController.onEventResize}" update="schedule" />
 									
 					</p:schedule>
-				</p:panelGrid>			
+				</p:panelGrid>	
+				</div>
+			
+					
 			<p:dialog id="dlgAgenda" widgetVar="dlg"  resizable="true"
 				modal="true" showEffect="clip" height="430" width="400" >	
 					
@@ -31,7 +35,7 @@
 								<div class="ui-g-12" style="margin-top: 4%" >
 									<h:panelGroup styleClass="md-inputfield">
 										<h:outputLabel
-											value="Código #{agendamentoController.objeto.id}" />
+											value="Código #{agendaCalendarioController.objeto.id}" />
 									</h:panelGroup>
 								</div>
 								<div class="ui-g-12" style="margin-top: 4%">
@@ -67,7 +71,19 @@
 									</h:panelGroup>
 								</div>
 								
-								<div class="ui-g-12" style="margin-left: 73%; ">							 
+								<div style="margin-top: 5%">								
+								<p:commandButton value="Excluir"
+												 icon="ui-icon-trash" 
+												 disabled="#{empty agendaCalendarioController.objeto.id}"
+			                                     actionListener="#{agendaCalendarioController.excluir()}"
+			                                     update="form1:frmCalendario:schedule"
+			                                     oncomplete="if (!args.validationFailed) {PF('dlg').hide();}" >
+			                          <p:confirm header="Confirmação" message="Confirma Exclusão?"
+										icon="ui-icon-alert" />	
+								</p:commandButton>
+			                    </div>
+			                    
+			                    <div class="ui-g-12" style="margin-left: 73%;margin-top: -12.2%">						 
 								<p:commandButton value="Proximo" 
 			                                     actionListener="#{agendaCalendarioController.proximoTab()}"
 			                                     update="form1:frmCalendario:dlgAgenda"
@@ -136,17 +152,115 @@
 							</div>			            
 						</p:tab>
 						<p:tab title="Adiantamento" disabled="#{agendaCalendarioController.abaAdiantamento}">
-							<p:panelGrid>										 
-								<p:commandButton value="Proximo" style="float:right"
-			                                     actionListener="#{agendaCalendarioController.proximoTab()}"
-			                                     update="form1:frmCalendario:dlgAgenda"
-			                                     oncomplete="PF('dlg').show();" />
-			                </p:panelGrid>	
+								<div class="ui-g" >									
+					                    	<div class="ui-g-12" >
+					                            <h:panelGroup styleClass="md-inputfield">
+					                            	<h:outputLabel  value="Código #{agendaCalendarioController.finLancamentoCaixa.id}" />
+					                            </h:panelGroup>				                            
+					                        </div>
+					                        <div class="ui-g-12" style="margin-top:7%" >
+					                            <h:panelGroup styleClass="md-inputfield">
+					                                <p:calendar pattern="dd/MM/yyyy" value="#{agendaCalendarioController.finLancamentoCaixa.data}"/>
+					                                <label>Data</label>
+					                            </h:panelGroup>			                            
+					                        </div>
+					                        <div class="ui-g-12" >				                        
+					                            <p:selectOneMenu
+					                             value="#{agendaCalendarioController.finLancamentoCaixa.finContas}"                              
+					                             converter="contasConverter">
+					                            <f:selectItem itemValue="" itemLabel="Selecione a conta"/>
+									            <f:selectItems value="#{lancamentoCaixaController.listaContas}" var="objeto"
+									                              itemLabel="#{objeto.nomeBanco}" itemValue="#{objeto}"/>
+									            </p:selectOneMenu>
+					                            
+					                        </div>
+					                        <div class="ui-g-12" style="margin-top: 5%">
+					                            <h:panelGroup styleClass="md-inputfield">
+					                                <p:inputText value="#{agendaCalendarioController.finLancamentoCaixa.valor}"/>
+					                                <label>Valor</label>
+					                            </h:panelGroup>
+					                        </div>				                        
+					                        <div class="ui-g-12">
+					                            <h:panelGroup styleClass="md-inputfield">
+					                                <p:inputTextarea placeholder="Observação"
+					                                value="#{agendaCalendarioController.finLancamentoCaixa.descricao}"
+													rows="6"
+													cols="33" />
+					                            </h:panelGroup>
+					                        </div>
+					            
+							<div style="margin-top: 5%">
+								<p:commandButton value="Anterior"
+									actionListener="#{agendaCalendarioController.anteriorTab()}"
+									update="form1:frmCalendario:dlgAgenda, :form1:frmCalendario:tabAgenda:dataTableLancamentoServico"
+									oncomplete="PF('dlg').show();" />
+							</div>
+							<div class="ui-g-12"
+								style="margin-left: 73%; margin-top: -11.45%">
+								<p:commandButton value="Proximo"
+									actionListener="#{agendaCalendarioController.proximoTab()}"
+									update="form1:frmCalendario:dlgAgenda"
+									oncomplete="PF('dlg').show();" />
+
+							</div>
+							</div>		
 											
 						</p:tab>
-						<p:tab title="Totais" disabled="#{agendaCalendarioController.abaTotais}">
-									 
-							
+						<p:tab title="Totais" disabled="#{agendaCalendarioController.abaTotais}">	
+						<div class="ui-g dashboard">								 
+							<div class="ui-g-12 activity-feed" >				               			                    
+				                    <div class="ui-g" >
+				                        <div class="ui-g-12 ui-md-3" style="margin-left:-7%">
+				                            <span style="width: 100px;" >Total parcial</span>
+				                            <div class="knob income" style="font-size:17px;width:80px;height:80px;line-height: 90px">
+				                            	<h:outputLabel style="margin-top:-10%;line-width: 520px;" value="#{agendaCalendarioController.objeto.agendamentoValores.valorParcial}" >
+					                            <f:convertNumber pattern="R$#,##0.00"/>					                            
+					                            </h:outputLabel>
+				                            </div>
+				                        </div>
+				                        <div class="ui-g-12 ui-md-3" style="margin-left:10%" >
+				                            <span style="width: 100px;" >Desconto </span>
+				                            <div class="knob invoice" style="font-size:17px;width:80px;height:80px;line-height: 90px">
+				                            	<h:outputLabel value="#{agendaCalendarioController.finLancamentoCaixa.valor}" >
+					                            <f:convertNumber pattern="R$#,##0.00"/>					                            
+					                            </h:outputLabel>
+				                            </div>
+				                        </div>
+				                        <div class="ui-g-12 ui-md-3" style="margin-left:10%" >
+				                            <span style="width: 100px;" >Total geral</span>
+				                            <div class="knob tax" style="font-size:17px;width:80px;height:80px;line-height: 90px">
+					                            <h:outputLabel value="#{agendaCalendarioController.objeto.agendamentoValores.valorTotal}" >
+					                            <f:convertNumber pattern="R$#,##0.00"/>					                            
+					                            </h:outputLabel>
+				                            </div>
+				                        </div>	
+				                  			                        	
+											
+												<div style="margin-top: 20%">
+													<p:commandButton value="Anterior"
+														actionListener="#{agendaCalendarioController.anteriorTab()}"
+														update="form1:frmCalendario:dlgAgenda, :form1:frmCalendario:tabAgenda:dataTableLancamentoServico"
+														oncomplete="PF('dlg').show();" />
+												</div>
+												<div style="margin-left: 73%; margin-top: -10%;">
+													<p:commandButton value="Salvar" style="width: 100px;"
+														actionListener="#{agendamentoController.salvar()}"
+														rendered="#{empty agendaCalendarioController.objeto.id}"
+														update=":form1:growl,:form1:frmCalendario, :form1:frmCalendario:tabAgenda"
+														disabled="#{!agendamentoController.podeInserir()}"
+														oncomplete="PF('dlg').show();" />
+													<p:commandButton value="Alterar" style="width: 100px;"
+														rendered="#{not empty agendaCalendarioController.objeto.id}"
+														actionListener="#{agendaCalendarioController.salvar()}"
+														update=":form1:growl,:form1:frmCalendario, :form1:frmCalendario:tabAgenda"
+														disabled="#{!agendaCalendarioController.podeAlterar()}" />
+					
+												</div>	
+										 
+				                    </div>
+				        
+				            </div>
+				          </div>  
 						</p:tab>
 						</p:tabView>
 				

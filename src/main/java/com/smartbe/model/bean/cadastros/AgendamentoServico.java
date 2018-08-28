@@ -40,6 +40,8 @@ public class AgendamentoServico implements Serializable {
 		private Funcionario funcionario;		
 		@Column(name = "VALOR")
 	    private BigDecimal valor;
+		@Column(name = "COR_EVENTO")
+		private Integer corEvento;
 	    @JoinColumn(name = "ID_AGENDAMENTO", referencedColumnName = "ID")
 	    @ManyToOne(optional = false, cascade = CascadeType.MERGE)
 	    private Agendamento agendamento;
@@ -87,6 +89,13 @@ public class AgendamentoServico implements Serializable {
 		}
 		public void setDataFinal(Date dataFinal) {
 			this.dataFinal = dataFinal;
+		}
+		
+		public Integer getCorEvento() {
+			return corEvento;
+		}
+		public void setCorEvento(Integer corEvento) {
+			this.corEvento = corEvento;
 		}
 		@Override
 		public int hashCode() {

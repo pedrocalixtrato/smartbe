@@ -63,6 +63,7 @@ public class AgendaCalendarioController extends AbstractController<Agendamento> 
 	private DaoGenerico<Cliente> clienteDao;
 	private DaoGenerico<FinPlanoContas> finPlanoContasDao;
 	private DaoGenerico<FinLancamentoCaixa> finLancamentoCaixaDao;	
+	private DaoGenerico<Agendamento> agendamentoDao;
 	private List <AgendamentoServico> agendamentosServicos;
 	private FinContas finContas ;
 	private FilterData filtro;	
@@ -87,6 +88,7 @@ public class AgendaCalendarioController extends AbstractController<Agendamento> 
 		filtro = new FilterData();	
 		agendamentoServicoDao = new AgendamentoServicoDao();
 		finLancamentoCaixaDao = new DaoGenerico<>(FinLancamentoCaixa.class);
+		agendamentoDao = new DaoGenerico<>(Agendamento.class);
 		agendamentoServico = new AgendamentoServico();
 		agendamentoServicoDAO = new DaoGenerico<>(AgendamentoServico.class);
 		if (eventModel==null) {
@@ -110,6 +112,15 @@ public class AgendaCalendarioController extends AbstractController<Agendamento> 
 			event.setDescription(String.valueOf(ls.getValor()));
 			event.setAllDay(false);
 			event.setEditable(true);
+			if(ls.getCorEvento() == 1) {
+			event.setStyleClass("vermelho");
+			}
+			if(ls.getCorEvento() == 2) {
+				event.setStyleClass("verde");
+				}
+			if(ls.getCorEvento() == 3) {
+				event.setStyleClass("azul");
+				}
 			
 			eventModel.addEvent(event);
 		}
@@ -121,7 +132,6 @@ public class AgendaCalendarioController extends AbstractController<Agendamento> 
 	@Override
 	public void incluir() {
 		super.incluir();
-		agendamentoServico = new AgendamentoServico();
 		finLancamentoCaixa = new FinLancamentoCaixa();
 		finLancamentoCaixa.setData(new Date());
 		getObjeto().setListaAgendamentoServico(new HashSet<AgendamentoServico>());
@@ -176,6 +186,35 @@ public class AgendaCalendarioController extends AbstractController<Agendamento> 
         agendamentoServico = agendamentoServicoSelecionado;
     }
 	
+	@Override
+	public void excluir() {	
+			finLancamentoCaixa = new FinLancamentoCaixa();
+			finLancamentoCaixaDao = new DaoGenerico<>(FinLancamentoCaixa.class);
+			try {				
+				if(getObjetoSelecionado().getAgendamentoValores().getQtdAdiantamento() != 0) {				   
+				    finLancamentoCaixa = finLancamentoCaixaDao.getBean("idAdiantamento",getObjetoSelecionado().getId());				    
+				    finLancamentoCaixaDao.excluir(finLancamentoCaixa);
+				    
+				    super.excluir();
+				    eventModel.clear();
+				    init();
+				    FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_INFO, "Registro removido com sucesso!", null);
+				    }else {
+			    	super.excluir();
+			    	eventModel.clear();
+			    	init();
+			    	FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_INFO, "Registro removido com sucesso!", null);
+			    }
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+		    	FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_ERROR, "Não foi possivel excluir este registro!", null);
+		    	FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_ERROR, "Existe lancamentos financeiros!", null);
+
+			}		
+				
+	}
+	
 	public void excluirServico() {
         if (agendamentoServicoSelecionado == null || agendamentoServicoSelecionado.getId() == null) {
             FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_INFO, "Nenhum registro selecionado!", null);
@@ -216,7 +255,6 @@ public class AgendaCalendarioController extends AbstractController<Agendamento> 
 		} else {
 
 			podeIncluirServico = true;
-			agendamentoServico = new AgendamentoServico();
 			agendamentoServico.setAgendamento(getObjeto());
 		}
 	}
@@ -338,7 +376,8 @@ public class AgendaCalendarioController extends AbstractController<Agendamento> 
              e.printStackTrace();
         }
         return listaPlanoContas;
-    }
+    }	
+	
 	
 	public void eventoSelecionado(SelectEvent eventSelect){
 		
@@ -347,10 +386,33 @@ public class AgendaCalendarioController extends AbstractController<Agendamento> 
 		for(AgendamentoServico as : listaServicos){
 			if(as.getId() ==  evento1.getData()){
 			
-				agendamentoServico = as;
+				agendamentoServico = as;	
+				try {
+					Agendamento agendamento = agendamentoDao.getBean("id",agendamentoServico.getAgendamento().getId());
+					setObjetoSelecionado(agendamento);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				break;				
 			}			
-		}		
+		}	
+
+		DaoGenerico<FinLancamentoCaixa> finLancamentoCaixaDao = new DaoGenerico<>(FinLancamentoCaixa.class);		
+		try {
+			finLancamentoCaixa = new FinLancamentoCaixa();
+			if(agendamentoServico.getAgendamento().getAgendamentoValores().getQtdAdiantamento() != 0) {
+			finLancamentoCaixa = finLancamentoCaixaDao.getBean("idAdiantamento",getObjetoSelecionado().getId());			
+			}
+			
+					
+		} catch (Exception e) {			
+			e.printStackTrace();
+		}
+		abaGeral = false;
+		abaServico = false;
+		abaAdiantamento = false;
+		abaTotais = false;
+		super.alterar();
 	}
 	
 	public void quandoNovo(SelectEvent selectEvent){
@@ -552,8 +614,16 @@ public class AgendaCalendarioController extends AbstractController<Agendamento> 
 		this.podeIncluirServico = podeIncluirServico;
 	}
 
+	public FinLancamentoCaixa getFinLancamentoCaixa() {
+		return finLancamentoCaixa;
+	}
+
+	public void setFinLancamentoCaixa(FinLancamentoCaixa finLancamentoCaixa) {
+		this.finLancamentoCaixa = finLancamentoCaixa;
+	}
+
 	
- 
+	
 	
 	
 

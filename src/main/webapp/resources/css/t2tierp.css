@@ -14,7 +14,12 @@
 .ui-selectonemenu-label {
     width: 100% !important;
 }
-
+.emp1 {
+    background: red;
+}
+.emp2 .fc-event-skin {
+   background: green;
+ }
 .t2ti-campo-10 {
     float: left;
     width: 8%;

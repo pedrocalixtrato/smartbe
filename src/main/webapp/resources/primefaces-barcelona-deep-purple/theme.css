@@ -15,6 +15,13 @@ body .ui-widget-content {
   padding: 8px 14px; }
   body .ui-widget-content .ui-icon {
     color: #757575; }
+    
+ .emp1 .fc-event-skin {
+    background: red;
+}
+.emp2 .fc-event-skin {
+   background: green;
+ }
 body .ui-widget-header {
   background-color: #673ab7;
   color: #ffffff;
