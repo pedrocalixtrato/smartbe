@@ -68,6 +68,7 @@ public class AgendaCalendarioController extends AbstractController<Agendamento> 
 	private FinContas finContas ;
 	private FilterData filtro;	
 	private AgendamentoServicoDao agendamentoServicoDao;	
+	private String tituloCalendario;
 	
 	private int tabIndex = 0;
 	private boolean abaGeral = false;
@@ -107,18 +108,18 @@ public class AgendaCalendarioController extends AbstractController<Agendamento> 
 			DefaultScheduleEvent event = new DefaultScheduleEvent();
 			event.setEndDate(ls.getDataFinal());
 			event.setStartDate(ls.getDataInicio());
-			event.setTitle(ls.getAgendamento().getCliente().getNome());
+			event.setTitle(ls.getAgendamento().getCliente().getNome() + " -- " + ls.getServico().getDescricao());
 			event.setData(ls.getId());
 			event.setDescription(String.valueOf(ls.getValor()));
 			event.setAllDay(false);
 			event.setEditable(true);
-			if(ls.getCorEvento() == 1) {
+			if(ls.getServico().getCorEvento() == 1) {
 			event.setStyleClass("vermelho");
 			}
-			if(ls.getCorEvento() == 2) {
+			if(ls.getServico().getCorEvento() == 2) {
 				event.setStyleClass("verde");
 				}
-			if(ls.getCorEvento() == 3) {
+			if(ls.getServico().getCorEvento() == 3) {
 				event.setStyleClass("azul");
 				}
 			
@@ -159,8 +160,7 @@ public class AgendaCalendarioController extends AbstractController<Agendamento> 
 				cliente.setNome(nomeCliente);
 				getObjeto().setCliente(cliente);
 				clienteSalvo = true;
-				super.salvar();
-				jaSalvo = true;
+				super.salvar();		    
 				cliente = clienteDao.getBean("id", getObjeto().getCliente().getId());
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -169,18 +169,67 @@ public class AgendaCalendarioController extends AbstractController<Agendamento> 
 		if (clienteSalvo == true && getObjeto().getCliente() == null) {
 			try {				
 				getObjeto().setCliente(cliente);
-				super.salvar();
+				super.salvar();				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}else {
-			if(jaSalvo == false ) {
+			if(jaSalvo == false ) {				
 			super.salvar();
+			}
+		}
+		
+		clienteSalvo = false;
+	}	
+	
+	public void salvarAtualizar() {
+		boolean jaSalvo = false ;
+		if (getObjeto().getDataInicio() == null) {
+			getObjeto().setStatus("EM ABERTO");
+			getObjeto().setDataInicio(new Date());
+		}
+		if(finLancamentoCaixa.getValor().compareTo(BigDecimal.ZERO) != 0 ) {
+			adicionarAdiantamento();
+			try {
+				finLancamentoCaixa = finLancamentoCaixaDao.getBean("idAdiantamento", getObjeto().getId());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}			
+		
+		}
+		if (getObjeto().getCliente() == null && nomeCliente != null && clienteSalvo == false) {
+			try {
+				cliente.setNome(nomeCliente);
+				getObjeto().setCliente(cliente);
+				clienteSalvo = true;
+				super.salvar();			    
+				cliente = clienteDao.getBean("id", getObjeto().getCliente().getId());
+				recarregarEvent();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		if (clienteSalvo == true && getObjeto().getCliente() == null) {
+			try {				
+				getObjeto().setCliente(cliente);
+				super.salvar();				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}else {
+			if(jaSalvo == false ) {				
+			super.salvar();
+			recarregarEvent();
 			}
 		}
 		
 		
 	}	
+	
+	public void recarregarEvent() {
+		eventModel.clear();
+	    init();
+	}
 	
 	public void alterarServico() {
         agendamentoServico = agendamentoServicoSelecionado;
@@ -247,7 +296,12 @@ public class AgendaCalendarioController extends AbstractController<Agendamento> 
 		}	
 
 	public void incluirServico() {
-
+		if(agendamentoServico.getAgendamento() != null) {
+			AgendamentoServico agendamentoServico1 = new AgendamentoServico();
+			agendamentoServico1 = agendamentoServico;
+			agendamentoServico = new AgendamentoServico();
+			agendamentoServico.setDataInicio(agendamentoServico1.getDataInicio());
+		}
 		if (getObjeto().getCliente() == null && nomeCliente == null) {
 			podeIncluirServico = false;
 			FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_WARN,
@@ -262,7 +316,7 @@ public class AgendaCalendarioController extends AbstractController<Agendamento> 
         try {	            
             if (!getObjeto().getListaAgendamentoServico().contains(agendamentoServico)) {	            	
             	somarHorario();
-                //filtrarAgendamentoServico();
+                filtrarAgendamentoServico();
             	if(getObjeto().getDataFim() == null) {
             		getObjeto().setDataFim(getAgendamentoServico().getDataInicio());
             	}

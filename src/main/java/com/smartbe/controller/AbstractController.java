@@ -79,6 +79,7 @@ public abstract class AbstractController<T> implements Serializable {
 	private Map<String, String> issCodigoTributacao;
 	private Map<String, String> funcao;
 	private Map<String, Integer> tempoDuracao;
+	private Map<String, Integer> corEvento;
 	private Map<String, String> statusServico;
 	private Map<String, String> statusPagar;
 	private String somenteNFE;
@@ -399,6 +400,11 @@ public abstract class AbstractController<T> implements Serializable {
 		tempoDuracao.put("1 hora", 60);
 		tempoDuracao.put("1 hora e 30 minutos", 90);
 		tempoDuracao.put("2 horas", 120);
+		
+		corEvento = new LinkedHashMap<>();
+		corEvento.put("Vermelho", 1);
+		corEvento.put("Verde", 2);
+		corEvento.put("Azul", 3);
 		
 		statusServico = new LinkedHashMap<>();
 		statusServico.put("EM ABERTO","EM ABERTO");
@@ -787,6 +793,16 @@ public abstract class AbstractController<T> implements Serializable {
 
 	public void setTempoDuracao(Map<String, Integer> tempoDuracao) {
 		this.tempoDuracao = tempoDuracao;
+	}
+	
+	
+
+	public Map<String, Integer> getCorEvento() {
+		return corEvento;
+	}
+
+	public void setCorEvento(Map<String, Integer> corEvento) {
+		this.corEvento = corEvento;
 	}
 
 	public Map<String, String> getStatusServico() {

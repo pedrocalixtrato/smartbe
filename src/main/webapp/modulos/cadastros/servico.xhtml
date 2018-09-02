@@ -101,6 +101,12 @@
                					<f:selectItems value="#{servicoController.tempoDuracao}" itemValue="#{objeto}" />   								
                             </p:selectOneMenu>
                             
+                            <p:outputLabel value="Cor evento" />									
+                            <p:selectOneMenu value="#{servicoController.objeto.corEvento}" >                            	
+                            	<f:selectItem itemValue="" itemLabel="Selecione"/>
+               					<f:selectItems value="#{servicoController.corEvento}" itemValue="#{objeto}" />   								
+                            </p:selectOneMenu>
+                            
                         </h:panelGrid>
                     </p:outputPanel>
 

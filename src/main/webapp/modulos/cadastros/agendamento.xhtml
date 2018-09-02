@@ -248,11 +248,12 @@
 														rendered="#{empty agendaCalendarioController.objeto.id}"
 														update=":form1:growl,:form1:frmCalendario, :form1:frmCalendario:tabAgenda"
 														disabled="#{!agendamentoController.podeInserir()}"
-														oncomplete="PF('dlg').show();" />
+														oncomplete="PF('dlg').hide();" />
 													<p:commandButton value="Alterar" style="width: 100px;"
 														rendered="#{not empty agendaCalendarioController.objeto.id}"
-														actionListener="#{agendaCalendarioController.salvar()}"
-														update=":form1:growl,:form1:frmCalendario, :form1:frmCalendario:tabAgenda"
+														actionListener="#{agendaCalendarioController.salvarAtualizar()}"
+														update="form1:frmCalendario:schedule"
+														oncomplete="PF('dlg').hide();"
 														disabled="#{!agendaCalendarioController.podeAlterar()}" />
 					
 												</div>	
@@ -303,8 +304,7 @@
             <p:dialog id="dialogServico"
                       header="Inclusão/Alteração de Serviço"
                       widgetVar="dialogServico" showEffect="slide" hideEffect="slide"
-                      resizable="true" modal="true" closable="false" width="600"
-                      visible="#{agendaCalendarioController.podeIncluirServico}">
+                      resizable="true" modal="true" closable="false" width="600">
 
                 <p:outputPanel id="panelServico">
                 <p:panelGrid >

@@ -34,6 +34,8 @@ public class Servico implements Serializable {
 	@Column(name = "TEMPO_DURACAO")
 	private Integer tempoDuracao;
 	private Boolean servicoUnico;
+	@Column(name = "COR_EVENTO")
+	private Integer corEvento;
 	
 	public Integer getId() {
 		return id;
@@ -66,8 +68,16 @@ public class Servico implements Serializable {
 	}
 	public void setValor_custo(BigDecimal valor_custo) {
 		this.valor_custo = valor_custo;
-	}	
+	}
 	
+	
+	
+	public Integer getCorEvento() {
+		return corEvento;
+	}
+	public void setCorEvento(Integer corEvento) {
+		this.corEvento = corEvento;
+	}
 	public Boolean getServicoUnico() {
 		return servicoUnico;
 	}
