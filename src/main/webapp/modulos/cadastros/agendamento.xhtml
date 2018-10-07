@@ -23,8 +23,7 @@
 									
 					</p:schedule>
 				</p:panelGrid>	
-				</div>
-			
+			</div>
 					
 			<p:dialog id="dlgAgenda" widgetVar="dlg"  resizable="true"
 				modal="true" showEffect="clip" height="430" width="400" >	
@@ -117,10 +116,11 @@
 														actionListener="#{agendaCalendarioController.alterarServico()}"
 														 />
 													<p:commandButton process="dataTableLancamentoServico"
-														title="Excluir" icon="ui-icon-trash"														
+														title="Excluir" icon="ui-icon-trash" update=":formOutrasTelas:panelServico,
+														:form1:growl, :form1:frmCalendario:tabAgenda:dataTableLancamentoServico"														
 														actionListener="#{agendaCalendarioController.excluirServico}">
 														<p:confirm header="Confirmação" message="Confirma Exclusão?"
-															icon="ui-icon-alert" />
+															icon="ui-icon-alert"  />
 													</p:commandButton>
 												</f:facet>
 		

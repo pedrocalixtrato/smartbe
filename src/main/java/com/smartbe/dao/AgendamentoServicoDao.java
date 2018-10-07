@@ -37,8 +37,6 @@ public class AgendamentoServicoDao extends DaoGenerico<AgendamentoServico> {
 				criteria.createAlias("funcionario", "f").				
 				add(Restrictions.eq("f.nome", filtro.getStatusServico()));
 				
-			}else {
-				return null;
 			}
 
 			return criteria.setCacheable(true).list();

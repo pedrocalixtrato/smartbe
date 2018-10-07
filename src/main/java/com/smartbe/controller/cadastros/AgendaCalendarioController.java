@@ -18,10 +18,12 @@ import org.primefaces.event.ScheduleEntryResizeEvent;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.DefaultScheduleEvent;
 import org.primefaces.model.DefaultScheduleModel;
+import org.primefaces.model.LazyScheduleModel;
 import org.primefaces.model.ScheduleEvent;
 import org.primefaces.model.ScheduleModel;
 
 import com.smartbe.controller.AbstractController;
+import com.smartbe.dao.AgendamentoDao;
 import com.smartbe.dao.AgendamentoServicoDao;
 import com.smartbe.filter.FilterData;
 import com.smartbe.model.bean.cadastros.Agendamento;
@@ -37,23 +39,23 @@ import com.smartbe.util.FacesContextUtil;
 @ManagedBean
 @javax.faces.bean.ViewScoped
 public class AgendaCalendarioController extends AbstractController<Agendamento> implements Serializable {
-	
+
 	@Override
 	public Class<Agendamento> getClazz() {
 		return Agendamento.class;
 	}
-	
+
 	@Override
-    public String getFuncaoBase() {
-        return "AGENDAMENTO";
-    }
+	public String getFuncaoBase() {
+		return "AGENDAMENTO";
+	}
 
 	private static final long serialVersionUID = 1L;
 
 	private AgendamentoServico agendamentoServico;
 	private ScheduleModel eventModel;
 	private List<AgendamentoServico> listaServicos;
-	private String nomeCliente;	
+	private String nomeCliente;
 	private Cliente cliente;
 	private boolean clienteSalvo = false;
 	private FinPlanoContas finPlanoContas;
@@ -62,147 +64,150 @@ public class AgendaCalendarioController extends AbstractController<Agendamento> 
 	private DaoGenerico<AgendamentoServico> agendamentoServicoDAO;
 	private DaoGenerico<Cliente> clienteDao;
 	private DaoGenerico<FinPlanoContas> finPlanoContasDao;
-	private DaoGenerico<FinLancamentoCaixa> finLancamentoCaixaDao;	
+	private DaoGenerico<FinLancamentoCaixa> finLancamentoCaixaDao;
 	private DaoGenerico<Agendamento> agendamentoDao;
-	private List <AgendamentoServico> agendamentosServicos;
-	private FinContas finContas ;
-	private FilterData filtro;	
-	private AgendamentoServicoDao agendamentoServicoDao;	
+	private List<AgendamentoServico> agendamentosServicos;
+	private FinContas finContas;
+	private FilterData filtro;
+	private AgendamentoServicoDao agendamentoServicoDao;
 	private String tituloCalendario;
-	
+
 	private int tabIndex = 0;
 	private boolean abaGeral = false;
 	private boolean abaServico = false;
 	private boolean abaAdiantamento = false;
 	private boolean abaTotais = false;
-	private boolean podeIncluirServico;	
-	
+	private boolean podeIncluirServico;
 
-	
 	@PostConstruct
 	@Override
-	public void init(){
+	public void init() {
 		super.init();
 		cliente = new Cliente();
-		agendamentosServicos = new ArrayList<AgendamentoServico>();	
+		agendamentosServicos = new ArrayList<AgendamentoServico>();
 		clienteDao = new DaoGenerico<>(Cliente.class);
-		filtro = new FilterData();	
+		filtro = new FilterData();
 		agendamentoServicoDao = new AgendamentoServicoDao();
 		finLancamentoCaixaDao = new DaoGenerico<>(FinLancamentoCaixa.class);
 		agendamentoDao = new DaoGenerico<>(Agendamento.class);
 		agendamentoServico = new AgendamentoServico();
 		agendamentoServicoDAO = new DaoGenerico<>(AgendamentoServico.class);
-		if (eventModel==null) {
-	        eventModel = new DefaultScheduleModel();
-	    }		      
 		
-			
-		try {
-			listaServicos = agendamentoServicoDAO.getBeans();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		
-		for(AgendamentoServico ls : listaServicos ){
-			DefaultScheduleEvent event = new DefaultScheduleEvent();
-			event.setEndDate(ls.getDataFinal());
-			event.setStartDate(ls.getDataInicio());
-			event.setTitle(ls.getAgendamento().getCliente().getNome() + " -- " + ls.getServico().getDescricao());
-			event.setData(ls.getId());
-			event.setDescription(String.valueOf(ls.getValor()));
-			event.setAllDay(false);
-			event.setEditable(true);
-			if(ls.getServico().getCorEvento() == 1) {
-			event.setStyleClass("vermelho");
-			}
-			if(ls.getServico().getCorEvento() == 2) {
-				event.setStyleClass("verde");
-				}
-			if(ls.getServico().getCorEvento() == 3) {
-				event.setStyleClass("azul");
-				}
-			
-			eventModel.addEvent(event);
-		}
-		
-		
-		
-	}
-	
+		eventModel  = new LazyScheduleModel() {			
+            
+            @Override
+            public void loadEvents(Date start, Date end) {                
+            	try {
+            		FilterData filtro = new FilterData();
+            		AgendamentoServicoDao agendamentoServicoDao = new AgendamentoServicoDao();   
+            		filtro.setDataInicial(start);
+                	filtro.setDataFinal(end); 
+                	
+        			listaServicos = agendamentoServicoDao.filtrar(filtro);
+        		} catch (Exception e) {
+        			e.printStackTrace();
+        		}
+            	if(listaServicos != null) {
+                for (AgendamentoServico ls : listaServicos) {
+        			DefaultScheduleEvent event = new DefaultScheduleEvent();
+        			event.setEndDate(ls.getDataFinal());
+        			event.setStartDate(ls.getDataInicio());
+        			event.setTitle(ls.getAgendamento().getCliente().getNome() + " -- " + ls.getServico().getDescricao());
+        			event.setData(ls.getId());
+        			event.setDescription(String.valueOf(ls.getValor()));
+        			event.setAllDay(false);
+        			event.setEditable(true);
+        			if (ls.getServico().getCorEvento() == 1) {
+        				event.setStyleClass("vermelho");
+        			}
+        			if (ls.getServico().getCorEvento() == 2) {
+        				event.setStyleClass("verde");
+        			}
+        			if (ls.getServico().getCorEvento() == 3) {
+        				event.setStyleClass("azul");
+        			}
+
+        			eventModel.addEvent(event);
+        		}
+            	}
+            }   
+        };
+        }
+
+
 	@Override
 	public void incluir() {
 		super.incluir();
 		finLancamentoCaixa = new FinLancamentoCaixa();
 		finLancamentoCaixa.setData(new Date());
 		getObjeto().setListaAgendamentoServico(new HashSet<AgendamentoServico>());
-				
+
 	}
-	
+
 	@Override
 	public void salvar() {
-		boolean jaSalvo = false ;
+		boolean jaSalvo = false;
 		if (getObjeto().getDataInicio() == null) {
 			getObjeto().setStatus("EM ABERTO");
 			getObjeto().setDataInicio(new Date());
 		}
-		if(finLancamentoCaixa.getValor().compareTo(BigDecimal.ZERO) != 0 ) {
+		if (finLancamentoCaixa.getValor().compareTo(BigDecimal.ZERO) != 0) {
 			adicionarAdiantamento();
 			try {
 				finLancamentoCaixa = finLancamentoCaixaDao.getBean("idAdiantamento", getObjeto().getId());
 			} catch (Exception e) {
 				e.printStackTrace();
-			}			
-		
+			}
+
 		}
 		if (getObjeto().getCliente() == null && nomeCliente != null && clienteSalvo == false) {
 			try {
 				cliente.setNome(nomeCliente);
 				getObjeto().setCliente(cliente);
 				clienteSalvo = true;
-				super.salvar();		    
+				super.salvar();
 				cliente = clienteDao.getBean("id", getObjeto().getCliente().getId());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 		if (clienteSalvo == true && getObjeto().getCliente() == null) {
-			try {				
+			try {
 				getObjeto().setCliente(cliente);
-				super.salvar();				
+				super.salvar();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}else {
-			if(jaSalvo == false ) {				
-			super.salvar();
+		} else {
+			if (jaSalvo == false) {
+				super.salvar();
 			}
 		}
-		
+
 		clienteSalvo = false;
-	}	
-	
+	}
+
 	public void salvarAtualizar() {
-		boolean jaSalvo = false ;
+		boolean jaSalvo = false;
 		if (getObjeto().getDataInicio() == null) {
 			getObjeto().setStatus("EM ABERTO");
 			getObjeto().setDataInicio(new Date());
 		}
-		if(finLancamentoCaixa.getValor().compareTo(BigDecimal.ZERO) != 0 ) {
+		if (finLancamentoCaixa.getValor().compareTo(BigDecimal.ZERO) != 0) {
 			adicionarAdiantamento();
 			try {
 				finLancamentoCaixa = finLancamentoCaixaDao.getBean("idAdiantamento", getObjeto().getId());
 			} catch (Exception e) {
 				e.printStackTrace();
-			}			
-		
+			}
+
 		}
 		if (getObjeto().getCliente() == null && nomeCliente != null && clienteSalvo == false) {
 			try {
 				cliente.setNome(nomeCliente);
 				getObjeto().setCliente(cliente);
 				clienteSalvo = true;
-				super.salvar();			    
+				super.salvar();
 				cliente = clienteDao.getBean("id", getObjeto().getCliente().getId());
 				recarregarEvent();
 			} catch (Exception e) {
@@ -210,93 +215,94 @@ public class AgendaCalendarioController extends AbstractController<Agendamento> 
 			}
 		}
 		if (clienteSalvo == true && getObjeto().getCliente() == null) {
-			try {				
+			try {
 				getObjeto().setCliente(cliente);
-				super.salvar();				
+				super.salvar();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}else {
-			if(jaSalvo == false ) {				
-			super.salvar();
-			recarregarEvent();
+		} else {
+			if (jaSalvo == false) {
+				super.salvar();
+				recarregarEvent();
 			}
 		}
-		
-		
-	}	
-	
+
+	}
+
 	public void recarregarEvent() {
 		eventModel.clear();
-	    init();
+		init();
 	}
-	
-	public void alterarServico() {
-        agendamentoServico = agendamentoServicoSelecionado;
-    }
-	
-	@Override
-	public void excluir() {	
-			finLancamentoCaixa = new FinLancamentoCaixa();
-			finLancamentoCaixaDao = new DaoGenerico<>(FinLancamentoCaixa.class);
-			try {				
-				if(getObjetoSelecionado().getAgendamentoValores().getQtdAdiantamento() != 0) {				   
-				    finLancamentoCaixa = finLancamentoCaixaDao.getBean("idAdiantamento",getObjetoSelecionado().getId());				    
-				    finLancamentoCaixaDao.excluir(finLancamentoCaixa);
-				    
-				    super.excluir();
-				    eventModel.clear();
-				    init();
-				    FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_INFO, "Registro removido com sucesso!", null);
-				    }else {
-			    	super.excluir();
-			    	eventModel.clear();
-			    	init();
-			    	FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_INFO, "Registro removido com sucesso!", null);
-			    }
-				
-			} catch (Exception e) {
-				e.printStackTrace();
-		    	FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_ERROR, "Não foi possivel excluir este registro!", null);
-		    	FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_ERROR, "Existe lancamentos financeiros!", null);
 
-			}		
-				
+	public void alterarServico() {
+		agendamentoServico = agendamentoServicoSelecionado;
 	}
-	
+
+	@Override
+	public void excluir() {
+		finLancamentoCaixa = new FinLancamentoCaixa();
+		finLancamentoCaixaDao = new DaoGenerico<>(FinLancamentoCaixa.class);
+		try {
+			if (getObjetoSelecionado().getAgendamentoValores().getQtdAdiantamento() != 0) {
+				finLancamentoCaixa = finLancamentoCaixaDao.getBean("idAdiantamento", getObjetoSelecionado().getId());
+				finLancamentoCaixaDao.excluir(finLancamentoCaixa);
+
+				super.excluir();
+				eventModel.clear();
+				init();
+				FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_INFO, "Registro removido com sucesso!", null);
+			} else {
+				super.excluir();
+				eventModel.clear();
+				init();
+				FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_INFO, "Registro removido com sucesso!", null);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_ERROR, "Não foi possivel excluir este registro!",
+					null);
+			FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_ERROR, "Existe lancamentos financeiros!", null);
+
+		}
+
+	}
+
 	public void excluirServico() {
-        if (agendamentoServicoSelecionado == null || agendamentoServicoSelecionado.getId() == null) {
-            FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_INFO, "Nenhum registro selecionado!", null);
-        } else {
-            getObjeto().getListaAgendamentoServico().remove(agendamentoServicoSelecionado);
-            subtrairTotal();
-            salvar();
-            FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_INFO, "Registro excluído!", null);
-        }
-    }
-	 public void somarHorario() { 
-		 
-	     	GregorianCalendar gc = new GregorianCalendar();
-	         gc.setTime(agendamentoServico.getDataInicio()); 
-	         gc.add(Calendar.MINUTE, agendamentoServico.getServico().getTempoDuracao());	                
-	         Date dataFinal = gc.getTime();
-	         agendamentoServico.setDataFinal(dataFinal);
-	         
-	         System.out.println("este e o resultado" +gc.getTime());
-			 
-		 }
-	 
-	 public void filtrarAgendamentoServico() throws Exception{ 
-		 
-		 	filtro.setDataInicial(agendamentoServico.getDataInicio());		 	
-		 	filtro.setDataFinal(agendamentoServico.getDataFinal());
-		 	filtro.setStatusServico(agendamentoServico.getFuncionario().getNome());
-			this.agendamentosServicos = agendamentoServicoDao.filtrar(filtro);			
-			System.out.println("este é o retorno da pesquisa" + agendamentosServicos);
-		}	
+		if (agendamentoServicoSelecionado == null || agendamentoServicoSelecionado.getId() == null) {
+			FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_INFO, "Nenhum registro selecionado!", null);
+		} else {
+			getObjeto().getListaAgendamentoServico().remove(agendamentoServicoSelecionado);
+			subtrairTotal();
+			salvar();
+			FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_INFO, "Registro excluído!", null);
+		}
+	}
+
+	public void somarHorario() {
+
+		GregorianCalendar gc = new GregorianCalendar();
+		gc.setTime(agendamentoServico.getDataInicio());
+		gc.add(Calendar.MINUTE, agendamentoServico.getServico().getTempoDuracao());
+		Date dataFinal = gc.getTime();
+		agendamentoServico.setDataFinal(dataFinal);
+
+		System.out.println("este e o resultado" + gc.getTime());
+
+	}
+
+	public void filtrarAgendamentoServico() throws Exception {
+
+		filtro.setDataInicial(agendamentoServico.getDataInicio());
+		filtro.setDataFinal(agendamentoServico.getDataFinal());
+		filtro.setStatusServico(agendamentoServico.getFuncionario().getNome());
+		this.agendamentosServicos = agendamentoServicoDao.filtrar(filtro);
+		System.out.println("este é o retorno da pesquisa" + agendamentosServicos);
+	}
 
 	public void incluirServico() {
-		if(agendamentoServico.getAgendamento() != null) {
+		if (agendamentoServico.getAgendamento() != null) {
 			AgendamentoServico agendamentoServico1 = new AgendamentoServico();
 			agendamentoServico1 = agendamentoServico;
 			agendamentoServico = new AgendamentoServico();
@@ -312,154 +318,161 @@ public class AgendaCalendarioController extends AbstractController<Agendamento> 
 			agendamentoServico.setAgendamento(getObjeto());
 		}
 	}
+
 	public void salvarServico() {
-        try {	            
-            if (!getObjeto().getListaAgendamentoServico().contains(agendamentoServico)) {	            	
-            	somarHorario();
-                filtrarAgendamentoServico();
-            	if(getObjeto().getDataFim() == null) {
-            		getObjeto().setDataFim(getAgendamentoServico().getDataInicio());
-            	}
-            	if(agendamentosServicos == null || agendamentosServicos.isEmpty() ) {	            		
-	                getObjeto().getListaAgendamentoServico().add(agendamentoServico);
-	                calculaTotal();
-	                salvar();
-	                
-            	}else {
-            	 FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_WARN, "Horarios indisponiveis, verifique a agenda!", "");
-            	}
-            }
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_ERROR, "Ocorreu um erro ao salvar o registro", e.getMessage());
-        }
-    }
-	
+		try {
+			if (!getObjeto().getListaAgendamentoServico().contains(agendamentoServico)) {
+				somarHorario();
+				filtrarAgendamentoServico();
+				if (getObjeto().getDataFim() == null) {
+					getObjeto().setDataFim(getAgendamentoServico().getDataInicio());
+				}
+				if (agendamentosServicos == null || agendamentosServicos.isEmpty()) {
+					getObjeto().getListaAgendamentoServico().add(agendamentoServico);
+					calculaTotal();
+					salvar();
+
+				} else {
+					FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_WARN,
+							"Horarios indisponiveis, verifique a agenda!", "");
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_ERROR, "Ocorreu um erro ao salvar o registro",
+					e.getMessage());
+		}
+	}
+
 	public void adicionarAdiantamento() {
 		try {
-			if(finLancamentoCaixa.getId() == null) {
-			finContas = new FinContas();
-			finPlanoContas = new FinPlanoContas();
-			finLancamentoCaixaDao = new DaoGenerico<>(FinLancamentoCaixa.class);
-			getObjeto().getAgendamentoValores().setQtdAdiantamento(getObjeto().getAgendamentoValores().getQtdAdiantamento()+ 1);
-			finPlanoContas = getListaPlanoContas().get(0);
-			finLancamentoCaixa.setFormaPagamento("DEPOSITO");
-			if(getObjeto().getCliente()!= null) {
-			finLancamentoCaixa.setClienteFornecedor(getObjeto().getCliente().getNome());
-			}else {
-			finLancamentoCaixa.setClienteFornecedor(nomeCliente);
-			}
-			finLancamentoCaixa.setAgendamento(getObjeto());
-			finLancamentoCaixa.setIdAdiantamento(getObjeto().getId());			
-			finLancamentoCaixa.setFinPlanoContas(finPlanoContas);
-			if(finLancamentoCaixa.getDescricao() == null){
-				finLancamentoCaixa.setDescricao("Adiantamento");
-			}
-			finLancamentoCaixa.setTipo("Credito");
-			finLancamentoCaixaDao.merge(finLancamentoCaixa);
-			BigDecimal valorTotal = getObjeto().getAgendamentoValores().getValorParcial().subtract(finLancamentoCaixa.getValor());
-			getObjeto().getAgendamentoValores().setValorTotal(valorTotal);
-			salvar("Adiantamento incluido com sucesso!");
-			}else {
+			if (finLancamentoCaixa.getId() == null) {
+				finContas = new FinContas();
+				finPlanoContas = new FinPlanoContas();
+				finLancamentoCaixaDao = new DaoGenerico<>(FinLancamentoCaixa.class);
+				getObjeto().getAgendamentoValores()
+						.setQtdAdiantamento(getObjeto().getAgendamentoValores().getQtdAdiantamento() + 1);
+				finPlanoContas = getListaPlanoContas().get(0);
+				finLancamentoCaixa.setFormaPagamento("DEPOSITO");
+				if (getObjeto().getCliente() != null) {
+					finLancamentoCaixa.setClienteFornecedor(getObjeto().getCliente().getNome());
+				} else {
+					finLancamentoCaixa.setClienteFornecedor(nomeCliente);
+				}
+				finLancamentoCaixa.setAgendamento(getObjeto());
+				finLancamentoCaixa.setIdAdiantamento(getObjeto().getId());
+				finLancamentoCaixa.setFinPlanoContas(finPlanoContas);
+				if (finLancamentoCaixa.getDescricao() == null) {
+					finLancamentoCaixa.setDescricao("Adiantamento");
+				}
+				finLancamentoCaixa.setTipo("Credito");
+				finLancamentoCaixaDao.merge(finLancamentoCaixa);
+				BigDecimal valorTotal = getObjeto().getAgendamentoValores().getValorParcial()
+						.subtract(finLancamentoCaixa.getValor());
+				getObjeto().getAgendamentoValores().setValorTotal(valorTotal);
+				salvar("Adiantamento incluido com sucesso!");
+			} else {
 				finLancamentoCaixaDao = new DaoGenerico<>(FinLancamentoCaixa.class);
 				finPlanoContas = new FinPlanoContas();
-				getObjeto().getAgendamentoValores().setQtdAdiantamento(getObjeto().getAgendamentoValores().getQtdAdiantamento()+ 1);
+				getObjeto().getAgendamentoValores()
+						.setQtdAdiantamento(getObjeto().getAgendamentoValores().getQtdAdiantamento() + 1);
 				finPlanoContas = getListaPlanoContas().get(0);
-				if(getObjeto().getCliente()!= null) {
+				if (getObjeto().getCliente() != null) {
 					finLancamentoCaixa.setClienteFornecedor(getObjeto().getCliente().getNome());
-					}else {
+				} else {
 					finLancamentoCaixa.setClienteFornecedor(nomeCliente);
-					}				
+				}
 				finLancamentoCaixa.setFinPlanoContas(finPlanoContas);
-				BigDecimal valorTotal = getObjeto().getAgendamentoValores().getValorParcial().subtract(finLancamentoCaixa.getValor());
+				BigDecimal valorTotal = getObjeto().getAgendamentoValores().getValorParcial()
+						.subtract(finLancamentoCaixa.getValor());
 				getObjeto().getAgendamentoValores().setValorTotal(valorTotal);
 				finLancamentoCaixaDao.merge(finLancamentoCaixa);
 				salvar("Adiantamento alterado com sucesso!");
 			}
-			
-		}catch (Exception e) {
-			FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_ERROR, "Nao foi possivel adicionar o agendamento!", null);
-			e.printStackTrace();			
-		}	
+
+		} catch (Exception e) {
+			FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_ERROR, "Nao foi possivel adicionar o agendamento!",
+					null);
+			e.printStackTrace();
+		}
 	}
-	
+
 	public void subtrairTotal() {
-		BigDecimal novoValor = agendamentoServicoSelecionado.getAgendamento().getAgendamentoValores().getValorParcial().subtract(agendamentoServicoSelecionado.getValor());
+		BigDecimal novoValor = agendamentoServicoSelecionado.getAgendamento().getAgendamentoValores().getValorParcial()
+				.subtract(agendamentoServicoSelecionado.getValor());
 		agendamentoServicoSelecionado.getAgendamento().getAgendamentoValores().setValorParcial(novoValor);
 		calculaTotal();
-		 
-	 }
-	 
+
+	}
+
 	public void calculaTotal() {
 		BigDecimal desconto = BigDecimal.ZERO;
 		BigDecimal valorTotal = BigDecimal.ZERO;
 		BigDecimal valorSelecionado = BigDecimal.ZERO;
 		BigDecimal valorParcial = BigDecimal.ZERO;
-		
-		if(agendamentoServico != null) {
-		valorSelecionado = agendamentoServico.getValor();
+
+		if (agendamentoServico != null) {
+			valorSelecionado = agendamentoServico.getValor();
 		}
-		
-		if(getObjeto().getAgendamentoValores() != null) {
-		valorParcial = 	getObjeto().getAgendamentoValores().getValorParcial().add(valorSelecionado);	
-		}else {
-			valorParcial = 	valorSelecionado.add(valorParcial);
+
+		if (getObjeto().getAgendamentoValores() != null) {
+			valorParcial = getObjeto().getAgendamentoValores().getValorParcial().add(valorSelecionado);
+		} else {
+			valorParcial = valorSelecionado.add(valorParcial);
 		}
-		desconto = finLancamentoCaixa.getValor();		
-		valorTotal = valorParcial.subtract(desconto);		
-		if(getObjeto().getAgendamentoValores() == null) {
+		desconto = finLancamentoCaixa.getValor();
+		valorTotal = valorParcial.subtract(desconto);
+		if (getObjeto().getAgendamentoValores() == null) {
 			AgendamentoValores agendamentoValores = new AgendamentoValores();
 			getObjeto().setAgendamentoValores(agendamentoValores);
 			getObjeto().getAgendamentoValores().setValorParcial(valorParcial);
 			getObjeto().getAgendamentoValores().setValorTotal(valorTotal);
-		}else {
+		} else {
 			getObjeto().getAgendamentoValores().setValorParcial(valorParcial);
 			getObjeto().getAgendamentoValores().setValorTotal(valorTotal);
 		}
-		
-	}	
-	
+
+	}
+
 	public List<FinPlanoContas> getListaPlanoContas() {
 		finPlanoContasDao = new DaoGenerico<>(FinPlanoContas.class);
-        List<FinPlanoContas> listaPlanoContas = new ArrayList<>();
-        try {
-            listaPlanoContas = finPlanoContasDao.getBeansLike("descricao", "Receita");
-            
-        } catch (Exception e) {
-             e.printStackTrace();
-        }
-        return listaPlanoContas;
-    }	
-	
-	
-	public void eventoSelecionado(SelectEvent eventSelect){
-		
-		ScheduleEvent evento1 =  (ScheduleEvent) eventSelect.getObject();
-		
-		for(AgendamentoServico as : listaServicos){
-			if(as.getId() ==  evento1.getData()){
-			
-				agendamentoServico = as;	
+		List<FinPlanoContas> listaPlanoContas = new ArrayList<>();
+		try {
+			listaPlanoContas = finPlanoContasDao.getBeansLike("descricao", "Receita");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return listaPlanoContas;
+	}
+
+	public void eventoSelecionado(SelectEvent eventSelect) {
+
+		ScheduleEvent evento1 = (ScheduleEvent) eventSelect.getObject();
+
+		for (AgendamentoServico as : listaServicos) {
+			if (as.getId() == evento1.getData()) {
+
+				agendamentoServico = as;
 				try {
-					Agendamento agendamento = agendamentoDao.getBean("id",agendamentoServico.getAgendamento().getId());
+					Agendamento agendamento = agendamentoDao.getBean("id", agendamentoServico.getAgendamento().getId());
 					setObjetoSelecionado(agendamento);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				break;				
-			}			
-		}	
+				break;
+			}
+		}
 
-		DaoGenerico<FinLancamentoCaixa> finLancamentoCaixaDao = new DaoGenerico<>(FinLancamentoCaixa.class);		
+		DaoGenerico<FinLancamentoCaixa> finLancamentoCaixaDao = new DaoGenerico<>(FinLancamentoCaixa.class);
 		try {
 			finLancamentoCaixa = new FinLancamentoCaixa();
-			if(agendamentoServico.getAgendamento().getAgendamentoValores().getQtdAdiantamento() != 0) {
-			finLancamentoCaixa = finLancamentoCaixaDao.getBean("idAdiantamento",getObjetoSelecionado().getId());			
+			if (agendamentoServico.getAgendamento().getAgendamentoValores().getQtdAdiantamento() != 0) {
+				finLancamentoCaixa = finLancamentoCaixaDao.getBean("idAdiantamento", getObjetoSelecionado().getId());
 			}
-			
-					
-		} catch (Exception e) {			
+
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		abaGeral = false;
@@ -468,10 +481,11 @@ public class AgendaCalendarioController extends AbstractController<Agendamento> 
 		abaTotais = false;
 		super.alterar();
 	}
-	
-	public void quandoNovo(SelectEvent selectEvent){
-		
-		ScheduleEvent event = new DefaultScheduleEvent("",(Date)selectEvent.getObject(), (Date)selectEvent.getObject());
+
+	public void quandoNovo(SelectEvent selectEvent) {
+
+		ScheduleEvent event = new DefaultScheduleEvent("", (Date) selectEvent.getObject(),
+				(Date) selectEvent.getObject());
 		agendamentoServico = new AgendamentoServico();
 		agendamentoServico.setDataInicio(new java.sql.Date(event.getStartDate().getTime()));
 		agendamentoServico.setDataFinal(new java.sql.Date(event.getEndDate().getTime()));
@@ -481,10 +495,9 @@ public class AgendaCalendarioController extends AbstractController<Agendamento> 
 		abaAdiantamento = true;
 		abaTotais = true;
 		incluir();
-		
-		
+
 	}
-	
+
 	public void anteriorTab() {
 		if (tabIndex == 1) {
 			tabIndex = 0;
@@ -494,17 +507,17 @@ public class AgendaCalendarioController extends AbstractController<Agendamento> 
 				tabIndex = 1;
 				abaServico = false;
 			} else {
-			
-			if (tabIndex == 3) {
-				tabIndex = 2;
-				abaAdiantamento = false;
-				
-			}
+
+				if (tabIndex == 3) {
+					tabIndex = 2;
+					abaAdiantamento = false;
+
+				}
 			}
 		}
 
 	}
-	
+
 	public void proximoTab() {
 		if (tabIndex == 0) {
 			tabIndex = 1;
@@ -516,73 +529,71 @@ public class AgendaCalendarioController extends AbstractController<Agendamento> 
 				abaServico = true;
 				abaAdiantamento = false;
 			} else {
-			
-			if (tabIndex == 2) {
-				tabIndex = 3;
-				abaAdiantamento = true;
-				
-			}
+
+				if (tabIndex == 2) {
+					tabIndex = 3;
+					abaAdiantamento = true;
+
+				}
 			}
 		}
 
 	}
-	
-	 public void onEventMove(ScheduleEntryMoveEvent event) throws Exception {
-		 for(AgendamentoServico as : listaServicos){
-			 if(as.getId() == event.getScheduleEvent().getData()){
-				 agendamentoServico = as;
-				 try{
-					 agendamentoServicoDAO.merge(agendamentoServico);
-					 init();
-				 }catch(RuntimeException e){
-					 e.printStackTrace();
-					 FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_ERROR, "Erro ao salvar serviço", null);	
-					
-				 }
-				 break;
-			 }
-		  }	       
-	    }
-	
-	 public void onEventResize(ScheduleEntryResizeEvent event) throws Exception {
-		 for(AgendamentoServico as : listaServicos){
-			 if(as.getId() == event.getScheduleEvent().getData()){
-				 agendamentoServico = as;
-				 try{
-					 agendamentoServicoDAO.merge(agendamentoServico);
-					 init();
-				 }catch(RuntimeException e){
-					 e.printStackTrace();
-					
-				 }
-				 break;
-			 }
-		  }	      
-	    }
-	 
-	 public List<Cliente> getListaCliente(String nome) {
-	        List<Cliente> listaCliente = new ArrayList<>();
-	        DaoGenerico<Cliente> clienteDao = new DaoGenerico<>(Cliente.class);
-	        try {
-	            listaCliente = clienteDao.getBeansLike("nome", nome);
-	            if(listaCliente.isEmpty()) {
-	            	nomeCliente = nome;
-	            }
-	        } catch (Exception e) {
-	             e.printStackTrace();
-	        } 
-	        	
-	        return listaCliente;
-	    }	 
-	 
 
+	public void onEventMove(ScheduleEntryMoveEvent event) throws Exception {
+		for (AgendamentoServico as : listaServicos) {
+			if (as.getId() == event.getScheduleEvent().getData()) {
+				agendamentoServico = as;
+				try {
+					agendamentoServicoDAO.merge(agendamentoServico);
+					init();
+				} catch (RuntimeException e) {
+					e.printStackTrace();
+					FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_ERROR, "Erro ao salvar serviço", null);
 
-	public ScheduleModel getEventModel() {if (eventModel==null) {
-        eventModel = new DefaultScheduleModel();
-    }
-		return eventModel;
+				}
+				break;
+			}
+		}
 	}
 
+	public void onEventResize(ScheduleEntryResizeEvent event) throws Exception {
+		for (AgendamentoServico as : listaServicos) {
+			if (as.getId() == event.getScheduleEvent().getData()) {
+				agendamentoServico = as;
+				try {
+					agendamentoServicoDAO.merge(agendamentoServico);
+					init();
+				} catch (RuntimeException e) {
+					e.printStackTrace();
+
+				}
+				break;
+			}
+		}
+	}
+
+	public List<Cliente> getListaCliente(String nome) {
+		List<Cliente> listaCliente = new ArrayList<>();
+		DaoGenerico<Cliente> clienteDao = new DaoGenerico<>(Cliente.class);
+		try {
+			listaCliente = clienteDao.getBeansLike("nome", nome);
+			if (listaCliente.isEmpty()) {
+				nomeCliente = nome;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return listaCliente;
+	}
+
+	public ScheduleModel getEventModel() {
+		if (eventModel == null) {
+			eventModel = new DefaultScheduleModel();
+		}
+		return eventModel;
+	}
 
 	public void setEventModel(ScheduleModel eventModel) {
 		this.eventModel = eventModel;
@@ -675,10 +686,5 @@ public class AgendaCalendarioController extends AbstractController<Agendamento> 
 	public void setFinLancamentoCaixa(FinLancamentoCaixa finLancamentoCaixa) {
 		this.finLancamentoCaixa = finLancamentoCaixa;
 	}
-
-	
-	
-	
-	
 
 }
