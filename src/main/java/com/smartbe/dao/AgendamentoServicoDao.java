@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 import com.smartbe.filter.FilterData;
@@ -21,33 +23,64 @@ public class AgendamentoServicoDao extends DaoGenerico<AgendamentoServico> {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<AgendamentoServico> filtrar(FilterData filtro) throws Exception {
+	public List<AgendamentoServico> filtrar(FilterData filtro) {
 		try {
 
 			abrirConexao();
-			Session session = em.unwrap(Session.class);
-			Criteria criteria = session.createCriteria(AgendamentoServico.class);
-
-			if (filtro.getDataInicial() != null && filtro.getDataFinal() != null) {
-
-				criteria.add(Restrictions.ge("dataInicio", filtro.getDataInicial()))
-						.add(Restrictions.le("dataInicio", filtro.getDataFinal()));
+			
+			Criteria criteria = criarCriteriaParaFiltro(filtro); 
+			
+			criteria.setFirstResult(filtro.getPrimeiroRegistro());
+			criteria.setMaxResults(filtro.getQuantidadeRegistro());
+			
+			if(filtro.isAscendente() && filtro.getPropriedadeOrdenacao() != null) {
+				criteria.addOrder(Order.asc(filtro.getPropriedadeOrdenacao()));
+			}else if(filtro.getPropriedadeOrdenacao() != null) {
+				criteria.addOrder(Order.desc(filtro.getPropriedadeOrdenacao()));
 			}
-			if (filtro.getStatusServico() != null &&  !filtro.getStatusServico().trim().equals("")){
-				criteria.createAlias("funcionario", "f").				
-				add(Restrictions.eq("f.nome", filtro.getStatusServico()));
-				
-			}
+
+			
 
 			return criteria.setCacheable(true).list();
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			if (isAutoCommit()) {
-				fecharConexao();
-			}
-		}
+		} catch (Exception e) {			
+			e.getMessage();
+			return null;
+			
+		} 		
 	}
 	
+	public int quantidadFiltrados (FilterData filtro) {
+		Criteria criteria = criarCriteriaParaFiltro(filtro);
+		
+		criteria.setProjection(Projections.rowCount());
+		
+		return ((Number) criteria.uniqueResult()).intValue();
+	}
+	
+	private Criteria criarCriteriaParaFiltro(FilterData filtro) {
+		try {
+			abrirConexao();
+		
+		Session session = em.unwrap(Session.class);
+		Criteria criteria = session.createCriteria(AgendamentoServico.class);
+		
+		if (filtro.getDataInicial() != null && filtro.getDataFinal() != null) {
 
+			criteria.add(Restrictions.ge("dataInicio", filtro.getDataInicial()))
+					.add(Restrictions.le("dataInicio", filtro.getDataFinal()));
+		}
+		if (filtro.getStatusServico() != null &&  !filtro.getStatusServico().trim().equals("")){
+			criteria.createAlias("funcionario", "f").				
+			add(Restrictions.eq("f.nome", filtro.getStatusServico()));
+			
+		}
+		
+		return criteria;
+		
+		} catch (Exception e) {			
+			e.printStackTrace();
+			return null;
+		}
+		
+	}
 }

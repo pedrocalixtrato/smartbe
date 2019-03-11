@@ -8,16 +8,12 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.event.ActionEvent;
-import javax.servlet.http.HttpServletRequest;
-
-import org.primefaces.model.SortOrder;
 
 import com.smartbe.controller.AbstractController;
 import com.smartbe.dao.AgendamentoDao;
@@ -270,6 +266,8 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 		        }
 	    }
 	 
+	 
+	 
 	 public void somarHorario() { 
 		 
      	GregorianCalendar gc = new GregorianCalendar();
@@ -306,6 +304,7 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 	            FacesContextUtil.adicionaMensagem(FacesMessage.SEVERITY_ERROR, "Ocorreu um erro ao salvar o registro", e.getMessage());
 	        }
 	    }
+	 
 	 
 	 
 	 
@@ -425,7 +424,7 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
         Date dataFinal = gc.getTime();
 		filtro.setDataFinal(dataFinal);
 		}
-		this.agendamentos = agendamentoDao.filtrar(filtro);
+		this.agendamentos = agendamentoDao.filtrar(filtro);		
 		this.somarTotal = agendamentoDao.somarTotal(filtro);
         
 		
@@ -561,6 +560,14 @@ public class AgendamentoController extends AbstractController<Agendamento> imple
 
 	public void setCliente(Cliente cliente) {
 		this.cliente = cliente;
+	}
+
+	public List<AgendamentoServico> getAgendamentosServicos() {
+		return agendamentosServicos;
+	}
+
+	public void setAgendamentosServicos(List<AgendamentoServico> agendamentosServicos) {
+		this.agendamentosServicos = agendamentosServicos;
 	}
 	
 	

@@ -51,6 +51,8 @@ public class Funcionario implements Serializable {
     private String observacao;
     @Column(name = "TIPO")
     private String tipo;
+    @Column(name= "SENHA")
+    private String senha;
     
     
 	public Integer getId() {
@@ -131,6 +133,13 @@ public class Funcionario implements Serializable {
 	}
 	public void setTipo(String tipo) {
 		this.tipo = tipo;
+	}
+		
+	public String getSenha() {
+		return senha;
+	}
+	public void setSenha(String senha) {
+		this.senha = senha;
 	}
 	@Override
 	public int hashCode() {

@@ -43,6 +43,8 @@ public class AgendamentoServico implements Serializable {
 	    @JoinColumn(name = "ID_AGENDAMENTO", referencedColumnName = "ID")
 	    @ManyToOne(optional = false, cascade = CascadeType.MERGE)
 	    private Agendamento agendamento;
+	    @Column(name="STATUS_SERVICO")
+	    private String statusServico;
 	    
 		public Integer getId() {
 			return id;
@@ -87,9 +89,15 @@ public class AgendamentoServico implements Serializable {
 		}
 		public void setDataFinal(Date dataFinal) {
 			this.dataFinal = dataFinal;
+		}	
+		
+		
+		public String getStatusServico() {
+			return statusServico;
 		}
-		
-		
+		public void setStatusServico(String statusServico) {
+			this.statusServico = statusServico;
+		}
 		@Override
 		public int hashCode() {
 			final int prime = 31;

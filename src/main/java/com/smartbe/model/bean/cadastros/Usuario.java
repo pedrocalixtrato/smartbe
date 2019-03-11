@@ -63,11 +63,14 @@ public class Usuario implements Serializable {
     @Column(name = "ADMINISTRADOR")
     private String administrador;
     @JoinColumn(name = "ID_COLABORADOR", referencedColumnName = "ID")
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = true)
     private Colaborador colaborador;
     @JoinColumn(name = "ID_PAPEL", referencedColumnName = "ID")
     @ManyToOne(optional = false)
     private Papel papel;
+    @JoinColumn(name = "ID_FUNCIONARIO", referencedColumnName = "ID")
+    @ManyToOne(optional = true)
+    private Funcionario funcionario; 
 
     public Usuario() {
     }
@@ -127,8 +130,17 @@ public class Usuario implements Serializable {
     public void setPapel(Papel papel) {
         this.papel = papel;
     }
+    
 
-    @Override
+    public Funcionario getFuncionario() {
+		return funcionario;
+	}
+
+	public void setFuncionario(Funcionario funcionario) {
+		this.funcionario = funcionario;
+	}
+
+	@Override
     public String toString() {
         return "com.t2tierp.model.bean.cadastros.Usuario[id=" + id + "]";
     }

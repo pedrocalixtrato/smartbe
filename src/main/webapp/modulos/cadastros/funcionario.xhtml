@@ -43,6 +43,12 @@
                              tamanhoMaximo="100"
                              requerido="true"/>
                              
+	         <sb:campoSenha styleClass="t2ti-campo-20"
+	                        idComponente="funcionarioSenha" label="Senha"
+	                        nomeAtributo="#{funcionarioController.objeto.senha}"
+	                        tamanhoMaximo="6"
+	                        requerido="true"/>               
+                             
              <sb:campoData styleClass="t2ti-campo-20"
                             idComponente="produtoDataCadastro" label="Data de nascimento"
                             nomeAtributo="#{funcionarioController.objeto.data_nascimento}" />
@@ -56,7 +62,8 @@
                              idComponente="funcionarioTelefone" label="Telefone"
                              nomeAtributo="#{funcionarioController.objeto.telefone}"
                              tamanhoMaximo="30"
-                             requerido="true"/>
+                             requerido="true"/> 
+                                           
                              
             <sb:campoDecimal styleClass="t2ti-campo-20"
                                idComponente="funcionarioValor" label="Media valor"

@@ -23,6 +23,7 @@
                     <pa:menu widgetVar="me"> 
                           <p:menuitem  value="Agendamentos" outcome="/modulos/relatorios/pesquisaAgendamento.xhtml" ajax="false"/>
                           <p:menuitem  value="Agenda Calendario" outcome="/modulos/cadastros/agendamento.xhtml" ajax="false"/>
+                          <p:menuitem  value="Iniciar Servico" outcome="/modulos/relatorios/iniciarServico.xhtml" ajax="false"/>
                     </pa:menu>
                 </h:form>
             </pa:tab> 
@@ -47,7 +48,15 @@
                           <p:menuitem  value="Contas pagar" outcome="/modulos/financeiro/contasPagar.xhtml" ajax="false"/>
                     </pa:menu>
                 </h:form>
-            </pa:tab>          	 	
+            </pa:tab>
+            
+            <pa:tab icon="insert_chart" title="Relatorios">            
+                <h:form >       
+                    <pa:menu widgetVar="me">                           
+                          <p:menuitem  value="Movimentação"  outcome="/modulos/relatorios/relatorioMovimentacao.xhtml" ajax="false"/>                          
+                    </pa:menu>
+                </h:form>
+            </pa:tab>            	 	
        	 	      	 	
         </pa:tabMenu>                
     </div>
