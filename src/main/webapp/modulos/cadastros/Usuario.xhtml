@@ -1,0 +1,75 @@
+
+<ui:composition template="/WEB-INF/template.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sb="http://java.sun.com/jsf/composite/sb"
+	xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+
+
+	<ui:define name="gridDados">
+
+		<sb:gridDados id="telaGrid" controller="#{usuarioController}"
+			idDataTable="dataTableUsuario" nomeFuncao="Usuario">
+
+			<p:column headerText="Nome">
+				<h:outputLabel value="#{obj.login}" />
+			</p:column>			
+			<p:column headerText="Papel">
+				<h:outputLabel value="#{obj.papel.nome}" />
+			</p:column>
+					
+		</sb:gridDados>
+
+	</ui:define>
+
+	<ui:define name="telaInclusaoAlteracao">
+
+
+		 <sb:telaInclusaoAlteracao id="telaDetalhe"
+                                    controller="#{usuarioController}"
+                                    nomeFuncao="Usuario">
+            <div class="ui-g" >   
+             
+            <sb:campoTexto styleClass="t2ti-campo-50"
+                             idComponente="usuarioNome" label="Login"
+                             nomeAtributo="#{usuarioController.objeto.login}"
+                             tamanhoMaximo="100"
+                             requerido="true"/>
+                             
+             <sb:campoTexto styleClass="t2ti-campo-20"
+                             idComponente="usuarioNome" label="Senha"
+                             nomeAtributo="#{usuarioController.objeto.senha}"
+                             tamanhoMaximo="100"
+                             requerido="true"/>
+                             
+             <sb:campoData styleClass="t2ti-campo-20"
+                            idComponente="produtoDataCadastro" label="Data cadastro"
+                            nomeAtributo="#{usuarioController.objeto.dataCadastro}" />
+                            
+
+           <div class="#{t2ti-campo-20}">           
+            <p:outputLabel value="Funcionario" />
+                <p:selectOneMenu 
+                    value="#{usuarioController.objeto.funcionario}"                              
+                    converter="funcionarioConverter">
+                    <f:selectItem itemValue="" itemLabel="Selecione"/>
+				    <f:selectItems value="#{usuarioController.listaFuncionario}" var="objeto"
+				                   itemLabel="#{objeto.nome}" itemValue="#{objeto}"/>
+				</p:selectOneMenu>  
+			</div>        
+                             
+           
+                             
+          
+            
+		</div>
+        </sb:telaInclusaoAlteracao>
+
+
+	</ui:define>
+	
+
+</ui:composition>

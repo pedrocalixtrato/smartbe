@@ -69,9 +69,10 @@ public class AgendamentoServicoDao extends DaoGenerico<AgendamentoServico> {
 			criteria.add(Restrictions.ge("dataInicio", filtro.getDataInicial()))
 					.add(Restrictions.le("dataInicio", filtro.getDataFinal()));
 		}
-		if (filtro.getStatusServico() != null &&  !filtro.getStatusServico().trim().equals("")){
-			criteria.createAlias("funcionario", "f").				
-			add(Restrictions.eq("f.nome", filtro.getStatusServico()));
+		if (filtro.getCodFuncionario() != null ){
+			criteria.createAlias("funcionario", "f").	
+			
+			add(Restrictions.eq("f.id", filtro.getCodFuncionario()));
 			
 		}
 		

@@ -13,6 +13,7 @@ public class FilterData {
 	
 	private String statusServico;
 	private String nomeFuncionario;
+	private Integer codFuncionario;
 	
 	
 	public Date getDataInicial() {
@@ -63,6 +64,13 @@ public class FilterData {
 	public void setPropriedadeOrdenacao(String propriedadeOrdenacao) {
 		this.propriedadeOrdenacao = propriedadeOrdenacao;
 	}
+	public Integer getCodFuncionario() {
+		return codFuncionario;
+	}
+	public void setCodFuncionario(Integer codFuncionario) {
+		this.codFuncionario = codFuncionario;
+	}
+	
 	
 	
 	

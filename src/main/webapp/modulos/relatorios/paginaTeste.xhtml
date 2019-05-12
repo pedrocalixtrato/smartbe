@@ -1,0 +1,69 @@
+<ui:composition
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:x="http://xpert.com/faces"
+                xmlns:sb="http://java.sun.com/jsf/composite/sb">
+                
+
+	<h:head>
+
+	
+	</h:head>
+
+	<h:body styleClass="main-body">         
+		<h1>Pesquisa de Lançamentos</h1>		
+			<h:form id="frm">	
+				<p:outputLabel value="Data Inicial" for="dataLanc" />
+				<p:calendar id="dataLanc" size="10" 
+					 pattern="dd/MM/yyyy" timeZone="GMT-03:00" value="#{relatoriosMovimentacaoController.filtro.dataInicial}" />				
+				<p:spacer/>	
+				
+				
+				<p:outputLabel for="dataLanc2" value="Data final" />
+				<p:calendar id="dataLanc2"  size="10" 
+					pattern="dd/MM/yyyy" timeZone="GMT-03:00" value="#{relatoriosMovimentacaoController.filtro.dataFinal}" />
+				
+				
+				
+				
+				<p:outputLabel value="Tipo" />
+                <p:selectOneMenu id="funcionarios"                         
+                      value="#{relatoriosMovimentacaoController.filtro.nomeFuncionario}" 
+                      converter="funcionarioConverter">
+	                  <f:selectItem itemValue="" itemLabel=""/>
+					  <f:selectItems var="obj" value="#{relatoriosMovimentacaoController.funcionarios}" itemValue="#{obj}" itemLabel="#{obj.nome}" />
+				</p:selectOneMenu>			            
+				 	 						
+			
+			<p:toolbar style="margin-top: 20px" id="toolb">
+				<p:toolbarGroup>
+					<p:commandButton value="Pesquisar" style="margin-top:5px;background-color:#FF69B4"
+									 actionListener="#{relatoriosMovimentacaoController.consultar()}" update="frm" />					
+				</p:toolbarGroup>
+			</p:toolbar>
+						
+			 
+                                 
+                                    
+			<p:dataTable id="lancamentosTable" paginator="true" rows="5"
+				var="lancVar" value="#{relatoriosMovimentacaoController.agendamentosServicos}" 
+				emptyMessage="Nenhum registro encontrado." rowsPerPageTemplate="5,10,15,20"  lazy="true" > 
+				
+				
+				<p:column headerText="Cliente">
+					<h:outputText value="#{lancVar.agendamento.cliente.nome}" />
+				</p:column>	
+
+				
+				<p:column headerText="Observação">
+					<h:outputText value="#{lancVar.agendamento.observacao}" />
+				</p:column>	
+				
+			</p:dataTable>
+			</h:form>
+			</h:body>
+
+</ui:composition>

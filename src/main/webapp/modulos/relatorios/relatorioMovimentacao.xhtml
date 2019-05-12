@@ -1,0 +1,128 @@
+<ui:composition template="/WEB-INF/template.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:x="http://xpert.com/faces"
+                xmlns:sb="http://java.sun.com/jsf/composite/sb">
+                
+
+	<ui:define name="gridDados">	
+	
+	
+	 <p:outputPanel id="outputPanelGrid">
+            <p:outputPanel rendered="#{agendamentoController.telaGrid}">
+		<h1>Pesquisa de Lançamentos</h1>
+		
+				<div class="ui-g" >
+                <div class="t2ti-campo-20" >
+				<p:outputLabel value="Data Inicial" for="dataLanc" />
+				<p:calendar id="dataLanc" size="10" 
+					  pattern="dd/MM/yyyy HH:mm:ss"  timeZone="GMT-03:00" value="#{relatoriosMovimentacaoController.filtro.dataInicial}" />				
+				<p:spacer/>	
+				</div>
+				<div class="t2ti-campo-20" >
+				<p:outputLabel for="dataLanc2" value="Data final" />
+				<p:calendar id="dataLanc2"  size="10" 
+					pattern="dd/MM/yyyy HH:mm:ss" timeZone="GMT-03:00" value="#{relatoriosMovimentacaoController.filtro.dataFinal}" />
+				
+				</div>
+				
+				<div style="width:20%;
+					 float: left;
+					 padding-left: 25%;
+					 padding-right: 5%;">
+				<p:outputLabel value="Tipo" />
+                <p:selectOneMenu id="funcionarios"                         
+                      value="#{relatoriosMovimentacaoController.filtro.codFuncionario}" 
+                      converter="funcionarioConverter">
+	                  <f:selectItem itemValue="" itemLabel=""/>
+					  <f:selectItems var="obj" value="#{relatoriosMovimentacaoController.funcionarios}" itemValue="#{obj.id}" itemLabel="#{obj.id}" />
+				</p:selectOneMenu>
+				
+				<p:outputLabel value="teste"></p:outputLabel>
+				<p:inputText value="#{relatoriosMovimentacaoController.filtro.codFuncionario}"></p:inputText>			            
+				 	 
+				 </div>
+				</div>				
+			
+			<p:toolbar style="margin-top: 20px" id="toolb">
+				<p:toolbarGroup>						
+<!-- 					<p:inputText/>					 -->
+					<p:commandButton value="Pesquisar" style="margin-top:5px;background-color:#FF69B4" update="lancamentosTable" process="@form" />					
+				</p:toolbarGroup>
+			</p:toolbar>			
+			<div class="ui-g dashboard">
+		     <div class="ui-g-12 activity-feed">
+                <p:panel header="RESUMO FINANCEIRO" styleClass="ui-shadow-content">
+                    <h3>HOJE</h3>
+                    <p>Updated 1 minute ago</p>
+                    <div class="ui-g">
+                        <div class="ui-g-12 ui-md-3">
+                            <span>FATURAMENTO PARCIAL</span>
+                            <div class="knob income">R$900</div>
+                        </div>
+                        <div class="ui-g-12 ui-md-3">
+                            <span>FATURAMENTO REAL</span>
+                            <div class="knob tax">R$250</div>
+                        </div>
+                        <div class="ui-g-12 ui-md-3">
+                            <span>COMISSÃO FUNCIONARIOS</span>
+                            <div class="knob invoice">R$125</div>
+                        </div>
+                        <div class="ui-g-12 ui-md-3">
+                            <span>OUTRAS DESPESAS</span>
+                            <div class="knob expense">$250</div>
+                        </div>
+                    </div>
+                </p:panel>
+            </div> 
+            </div> 
+                            
+			<p:dataTable id="lancamentosTable"
+				var="lancVar" value="#{relatoriosMovimentacaoController.model}"  lazy="true"
+				style="margin-top: 20px" emptyMessage="Nenhum registro encontrado." paginator="true" rows="5"> 
+				
+					
+				<p:column headerText="Data" sortBy="#{lancVar.dataFinal}" filterBy="#{lancVar.dataFinal}" style="text-align: center; width: 180px">
+								    		
+					<h:outputText value="#{lancVar.dataFinal}" >
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="GMT-03:00"/>
+					</h:outputText>
+				</p:column>
+				
+				<p:column headerText="Cliente">
+					<h:outputText value="#{lancVar.agendamento.cliente.nome}" />
+				</p:column>	
+
+				<p:column headerText="Valor" style="text-align: center; width: 100px" >					
+					<h:outputLabel value="#{lancVar.agendamento.agendamentoValores.valorTotal}" >
+			           <f:convertNumber pattern="R$ #,###,##0.00" />
+			        </h:outputLabel>
+				</p:column>
+				
+				<p:column headerText="Observação">
+					<h:outputText value="#{lancVar.agendamento.observacao}" />
+				</p:column>	
+				
+				
+				
+			</p:dataTable>
+		
+			</p:outputPanel>
+			</p:outputPanel>
+			</ui:define>
+			
+			
+			
+		  
+	<ui:define name="outrasTelas2">
+
+	</ui:define>
+	<ui:define name="outrasTelas3">
+
+	</ui:define>
+
+
+</ui:composition>
